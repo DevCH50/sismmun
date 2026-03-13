@@ -1,0 +1,119 @@
+import 'package:sismmun/src/domain/useCases/auth/AuthUseCases.dart';
+import 'package:sismmun/src/domain/utils/Resource.dart';
+import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
+import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginState.dart';
+import 'package:sismmun/src/presentation/utils/BlocForItem.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../../domain/models/AuthResponse.dart';
+
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  AuthUseCases authUseCases;
+
+  LoginBloc(this.authUseCases) : super(const LoginState()) {
+    on<LoginInitialEvent>(_onLoginInitialEvent);
+    on<EmailChanged>(_onEmailChanged);
+    on<PasswordChanged>(_onPasswordChanged);
+    on<LoginSubmitted>(_onLoginSubmitted);
+    on<LoginFormReset>(_onLoginFormReset);
+    on<LoginSaveUserSession>(_onLoginSaveUserSession);
+    on<CheckSession>(_onCheckSession);
+  }
+
+  final formKey = GlobalKey<FormState>();
+
+  Future<void> _onLoginInitialEvent(
+    LoginInitialEvent event,
+    Emitter<LoginState> emit,
+  ) async {
+    final AuthResponse? authResponse = await authUseCases.getUserSession.run();
+    print('USUARIO DE SESSION: ${authResponse?.toJson()}');
+    emit(state.copyWith(formKey: formKey));
+    if (authResponse != null) {
+      emit(state.copyWith(response: Success(authResponse), formKey: formKey));
+    } else {
+      emit(state.copyWith(response: null, formKey: formKey));
+    }
+  }
+
+  Future<void> _onLoginSaveUserSession(
+    LoginSaveUserSession event,
+    Emitter<LoginState> emit,
+  ) async {
+    await authUseCases.saveUserSession.run(event.authResponse);
+  }
+
+  Future<void> _onLoginFormReset(
+    LoginFormReset event,
+    Emitter<LoginState> emit,
+  ) async {
+    state.formKey?.currentState?.reset();
+  }
+
+  Future<void> _onEmailChanged(
+    EmailChanged event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        email: BlocForItem(
+          value: event.email.value,
+          error: event.email.value.isNotEmpty
+              ? null
+              : 'Escribe el Nombre de Usuario',
+        ),
+        formKey: formKey,
+      ),
+    );
+  }
+
+  Future<void> _onPasswordChanged(
+    PasswordChanged event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        password: BlocForItem(
+          value: event.password.value,
+          error:
+              event.password.value.isNotEmpty && event.password.value.length < 6
+              ? 'Mínimo 6 caracteres'
+              : null,
+        ),
+        formKey: formKey,
+      ),
+    );
+  }
+
+  Future<void> _onLoginSubmitted(
+    LoginSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(state.copyWith(response: Loading(), formKey: formKey));
+    // await Future.delayed(const Duration(seconds: 5));
+
+    await Future.delayed(const Duration(seconds: 5), () async {
+      final Resource response = await authUseCases.login.run(
+        state.email.value,
+        state.password.value,
+      );
+      emit(state.copyWith(response: response, formKey: formKey));
+
+      print('Response: $response');
+    });
+  }
+
+  Future<void> _onCheckSession(
+    CheckSession event,
+    Emitter<LoginState> emit,
+  ) async {
+    final AuthResponse? authResponse = await authUseCases.getUserSession.run();
+    emit(
+      state.copyWith(
+        response: authResponse != null ? Success(authResponse) : null,
+        formKey: formKey,
+      ),
+    );
+  }
+}
