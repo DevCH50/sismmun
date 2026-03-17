@@ -1,4 +1,4 @@
-package com.example.sismmun
+package mx.gob.villahermosa.sismmun
 
 import io.flutter.embedding.android.FlutterActivity
 
