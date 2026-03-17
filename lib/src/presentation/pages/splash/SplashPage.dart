@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:sismmun/injection.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:sismmun/src/domain/utils/Resource.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginBloc.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
@@ -53,14 +53,9 @@ class _SplashPageState extends State<SplashPage> {
 
   Future<void> _initializeApp() async {
     try {
-      print('🚀 Iniciando...');
-
-      // Inicializar dependencias
-      await configureDependencies();
-      print('✅ Dependencias OK');
-
-      // Asegurar mínimo 2 segundos de splash
-      await Future.delayed(const Duration(milliseconds: 200));
+      // Las dependencias ya fueron inicializadas en main.dart
+      // Esperar brevemente para mostrar la animación
+      await Future.delayed(const Duration(milliseconds: 300));
 
       // Completar progreso
       if (mounted) {
@@ -70,23 +65,22 @@ class _SplashPageState extends State<SplashPage> {
         });
       }
 
-      // Pequeña pausa al 100%
-      await Future.delayed(const Duration(milliseconds: 5000));
+      // Pequeña pausa al 100% antes de navegar
+      await Future.delayed(const Duration(milliseconds: 800));
 
       // Verificar sesión y navegar
       if (mounted && !_hasNavigated) {
-        print('🔍 Verificando sesión...');
         context.read<LoginBloc>().add(const CheckSession());
 
-        // Dar tiempo al BLoC para procesar
-        await Future.delayed(const Duration(milliseconds: 2000));
+        // Dar tiempo al BLoC para procesar la sesión
+        await Future.delayed(const Duration(milliseconds: 500));
 
         // Navegar según el estado actual
         final currentState = context.read<LoginBloc>().state;
         _navigateBasedOnState(currentState);
       }
     } catch (e) {
-      print('❌ Error: $e');
+      if (kDebugMode) print('❌ Error en splash: $e');
       if (mounted && !_hasNavigated) {
         _hasNavigated = true;
         Navigator.pushReplacementNamed(context, 'login');
@@ -100,13 +94,9 @@ class _SplashPageState extends State<SplashPage> {
     if (_hasNavigated) return;
     _hasNavigated = true;
 
-    print('📍 Navegando según estado: ${state.response.runtimeType}');
-
-    if (state.response is Success && state.response != null) {
-      print('→ Homes');
+    if (state.response is Success) {
       Navigator.pushNamedAndRemoveUntil(context, 'Homes', (route) => false);
     } else {
-      print('→ Login');
       Navigator.pushNamedAndRemoveUntil(context, 'login', (route) => false);
     }
   }

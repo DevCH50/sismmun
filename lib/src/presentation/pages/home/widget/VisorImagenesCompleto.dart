@@ -23,8 +23,11 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
   @override
   void initState() {
     super.initState();
-    _indiceActual = widget.indiceInicial;
-    _pageController = PageController(initialPage: widget.indiceInicial);
+    // Protección contra índice fuera de rango
+    _indiceActual = widget.imagenes.isEmpty
+        ? 0
+        : widget.indiceInicial.clamp(0, widget.imagenes.length - 1);
+    _pageController = PageController(initialPage: _indiceActual);
   }
 
   @override
@@ -77,7 +80,7 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
             minScale: 0.5,
             maxScale: 4.0,
             child: Image.network(
-              imagen!.urlImagen,
+              imagen?.urlImagen ?? '',
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
@@ -228,7 +231,7 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
               const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
               const SizedBox(width: 8),
               Text(
-                widget.imagenes[_indiceActual]!.fecha,
+                widget.imagenes[_indiceActual]?.fecha ?? '',
                 style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ],

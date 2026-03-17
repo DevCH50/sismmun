@@ -192,7 +192,8 @@ class _SolicitudItemState extends State<SolicitudItem> {
   /// Construye una miniatura de imagen o icono de PDF
   Widget _buildMiniatura(int index) {
     final imagen = _imagenesLocales[index];
-    final bool esPdf = _esPdf(imagen!.urlThumb) || _esPdf(imagen.urlImagen);
+    if (imagen == null) return const SizedBox.shrink();
+    final bool esPdf = _esPdf(imagen.urlThumb) || _esPdf(imagen.urlImagen);
 
     return GestureDetector(
       onTap: () => esPdf ? _mostrarOpcionesPdf(imagen.urlImagen) : _mostrarImagenCompleta(index),

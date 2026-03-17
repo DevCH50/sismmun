@@ -30,6 +30,8 @@ class SolicitudRepositoryImpl implements SolicitudRepository {
         minHeight: 800,
       );
 
+      // Conservar todos los campos del request original,
+      // solo actualizar la ruta de la imagen comprimida
       final requestComprimida = SubirImagenRequest(
         dependenciaId: request.dependenciaId,
         solicitudId: request.solicitudId,
@@ -38,6 +40,9 @@ class SolicitudRepositoryImpl implements SolicitudRepository {
         imagenPath: archivoComprimido.path,
         latitud: request.latitud,
         longitud: request.longitud,
+        soloImagen: request.soloImagen,
+        observacion: request.observacion,
+        tipoFoto: request.tipoFoto,
       );
 
       final imagen = await solicitudService.subirImagen(requestComprimida);
