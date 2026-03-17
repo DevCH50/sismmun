@@ -18,9 +18,11 @@ class SolicitudesResponse {
     });
 
     factory SolicitudesResponse.fromJson(Map<String, dynamic> json) => SolicitudesResponse(
-        status: json['status'],
-        msg: json['msg'],
-        solicitudes: List<Solicitud>.from(json['solicitudes'].map((x) => Solicitud.fromJson(x))),
+        status: json['status'] ?? 0,
+        msg: json['msg'] ?? '',
+        solicitudes: json['solicitudes'] != null
+            ? List<Solicitud>.from(json['solicitudes'].map((x) => Solicitud.fromJson(x)))
+            : [],
     );
 
     Map<String, dynamic> toJson() => {

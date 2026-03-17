@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:sismmun/src/domain/models/AuthResponse.dart';
 import 'package:sismmun/src/domain/useCases/auth/AuthUseCases.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
@@ -5,8 +7,6 @@ import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginState.dart';
 import 'package:sismmun/src/presentation/utils/BlocForItem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../../domain/models/AuthResponse.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   AuthUseCases authUseCases;
@@ -28,7 +28,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     final AuthResponse? authResponse = await authUseCases.getUserSession.run();
-    print('USUARIO DE SESSION: ${authResponse?.toJson()}');
+    if (kDebugMode) print('USUARIO DE SESSION: ${authResponse?.toJson()}');
     emit(state.copyWith(formKey: formKey));
     if (authResponse != null) {
       emit(state.copyWith(response: Success(authResponse), formKey: formKey));
@@ -91,17 +91,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     emit(state.copyWith(response: Loading(), formKey: formKey));
-    // await Future.delayed(const Duration(seconds: 5));
 
-    await Future.delayed(const Duration(seconds: 5), () async {
-      final Resource response = await authUseCases.login.run(
-        state.email.value,
-        state.password.value,
-      );
-      emit(state.copyWith(response: response, formKey: formKey));
-
-      print('Response: $response');
-    });
+    final Resource response = await authUseCases.login.run(
+      state.email.value,
+      state.password.value,
+    );
+    emit(state.copyWith(response: response, formKey: formKey));
   }
 
   Future<void> _onCheckSession(

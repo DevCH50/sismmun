@@ -31,13 +31,13 @@ class AuthResponse {
     });
 
     factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
-        status: json['status'],
-        msg: json['msg'],
-        accessToken: json['access_token'],
-        tokenType: json['token_type'],
-        user: User.fromJson(json['user']),
-        apiVersion: json['api_version'],
-        appVersion: json['app_version'],
+        status: json['status'] ?? 0,
+        msg: json['msg'] ?? '',
+        accessToken: json['access_token'] ?? '',
+        tokenType: json['token_type'] ?? '',
+        user: User.fromJson(json['user'] ?? {}),
+        apiVersion: json['api_version'] ?? '',
+        appVersion: json['app_version'] ?? '',
     );
 
     Map<String, dynamic> toJson() => {

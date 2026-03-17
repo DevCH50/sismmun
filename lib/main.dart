@@ -1,3 +1,4 @@
+import 'package:sismmun/injection.dart';
 import 'package:sismmun/src/blocProvider.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:sismmun/src/presentation/pages/auth/register/RegisterPage.dart';
@@ -9,7 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await configureDependencies();
+  await configureDependencies();
   runApp(const MyApp());
 }
 

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:sismmun/src/data/api/ApiConfig.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
@@ -51,27 +53,21 @@ class SolicitudService {
         'tipo_foto': request.tipoFoto?.valor ?? '',
       };
 
-      print('📦 PAYLOAD:');
-      print('  user_id: $userId');
-      print('  denuncia_id: ${request.solicitudId}');
-      print('  dependencia_id: ${request.dependenciaId}');
-      print('  estatus_id: ${request.estatusId}');
-      print('  servicio_id: ${request.servicioId}');
-      print('  latitud: ${request.latitud ?? "vacío"}');
-      print('  longitud: ${request.longitud ?? "vacío"}');
-      print('  solo_imagen: ${request.soloImagen ? 1 : 0}');
-      print('  observacion: ${request.observacion ?? "vacío"}');
-      print('  tipo_foto: ${request.tipoFoto?.valor ?? "vacío"}');
+      if (kDebugMode) {
+        print('📦 PAYLOAD subir imagen - denuncia_id: ${request.solicitudId}');
+      }
 
-      final response = await http.post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(body),
-      );
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(body),
+          )
+          .timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
@@ -93,6 +89,8 @@ class SolicitudService {
           'Error del servidor: ${response.statusCode} - ${response.body}',
         );
       }
+    } on TimeoutException {
+      throw Exception('Tiempo de espera agotado al subir la imagen.');
     } catch (e) {
       rethrow;
     }

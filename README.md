@@ -48,35 +48,6 @@ lib/src/
 - Android SDK (para Android)
 - Xcode (para iOS)
 
-## Instalación
-
-```bash
-# Clonar el repositorio
-git clone git@github.com:DevCH50/sismmun.git
-
-# Instalar dependencias
-flutter pub get
-
-# Generar código (injectable)
-flutter pub run build_runner build
-
-# Ejecutar la aplicación
-flutter run
-```
-
-## Build
-
-```bash
-# APK para Android
-flutter build apk --release
-
-# App Bundle para Play Store
-flutter build appbundle --release
-
-# Build para iOS
-flutter build ios --release
-```
-
 ## Licencia
 
 Proyecto privado - Todos los derechos reservados.

@@ -49,20 +49,24 @@ class User {
     });
 
     factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'],
-        username: json['username'],
-        email: json['email'],
-        nombre: json['nombre'],
-        apPaterno: json['ap_paterno'],
-        apMaterno: json['ap_materno'],
-        curp: json['curp'],
-        celulares: json['celulares'],
+        id: json['id'] ?? 0,
+        username: json['username'] ?? '',
+        email: json['email'] ?? '',
+        nombre: json['nombre'] ?? '',
+        apPaterno: json['ap_paterno'] ?? '',
+        apMaterno: json['ap_materno'] ?? '',
+        curp: json['curp'] ?? '',
+        celulares: json['celulares'] ?? '',
         fechaNacimiento: _parseDate(json['fecha_nacimiento']),
         filenameThumb: json['filename_thumb'],
-        roleIdArray: List<int>.from(json['role_id_array'].map((x) => x)),
-        dependenciaIdArray: List<int>.from(json['dependencia_id_array'].map((x) => x)),
-        strGenero: json['str_genero'],
-        fullName: json['full_name'],
+        roleIdArray: json['role_id_array'] != null
+            ? List<int>.from(json['role_id_array'].map((x) => x))
+            : [],
+        dependenciaIdArray: json['dependencia_id_array'] != null
+            ? List<int>.from(json['dependencia_id_array'].map((x) => x))
+            : [],
+        strGenero: json['str_genero'] ?? '',
+        fullName: json['full_name'] ?? '',
     );
 
     Map<String, dynamic> toJson() => {

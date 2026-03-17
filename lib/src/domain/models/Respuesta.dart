@@ -24,16 +24,18 @@ class Respuesta {
     });
 
     factory Respuesta.fromJson(Map<String, dynamic> json) => Respuesta(
-        id: json['id'],
-        denunciaId: json['denuncia_id'],
-        dependenciaId: json['dependencia_id'],
-        servicioId: json['servicio_id'],
-        estatuId: json['estatu_id'],
-        fechaMovimiento: DateTime.parse(json['fecha_movimiento']),
-        observaciones: json['observaciones'],
-        favorable: json['favorable'],
-        fueLeida: json['fue_leida'],
-        creadoporId: json['creadopor_id'],
+        id: json['id'] ?? 0,
+        denunciaId: json['denuncia_id'] ?? 0,
+        dependenciaId: json['dependencia_id'] ?? 0,
+        servicioId: json['servicio_id'] ?? 0,
+        estatuId: json['estatu_id'] ?? 0,
+        fechaMovimiento: json['fecha_movimiento'] != null
+            ? DateTime.parse(json['fecha_movimiento'])
+            : DateTime.now(),
+        observaciones: json['observaciones'] ?? '',
+        favorable: json['favorable'] ?? false,
+        fueLeida: json['fue_leida'] ?? false,
+        creadoporId: json['creadopor_id'] ?? 0,
     );
 
     Map<String, dynamic> toJson() => {

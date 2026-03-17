@@ -46,25 +46,29 @@ class Solicitud {
     });
 
     factory Solicitud.fromJson(Map<String, dynamic> json) => Solicitud(
-        solicitudId: json['solicitud_id'],
-        fechaIngreso: json['fecha_ingreso'],
-        fechaUltimoEstatus: json['fecha_ultimo_estatus'],
-        denuncia: json['denuncia'],
-        dependenciaId: json['dependencia_id'],
-        dependencia: json['dependencia'],
-        servicioId: json['servicio_id'],
-        servicio: json['servicio'],
-        servicioUltimoEstatusId: json['servicio_ultimo_estatus_id'],
-        servicioUltimoEstatus: json['servicio_ultimo_estatus'],
-        ultimoEstatusId: json['ultimo_estatus_id'],
-        ultimoEstatus: json['ultimo_estatus']!!,
-        origenId: json['origen_id'],
-        origen: json['origen']!!,
-        latitud: json['latitud'],
-        longitud: json['longitud'],
-        observaciones: json['observaciones'],
-        imagenes: List<Imagen>.from(json['imagenes'].map((x) => Imagen.fromJson(x))),
-        respuestas: List<Respuesta>.from(json['respuestas'].map((x) => Respuesta.fromJson(x))),
+        solicitudId: json['solicitud_id'] ?? 0,
+        fechaIngreso: json['fecha_ingreso'] ?? '',
+        fechaUltimoEstatus: json['fecha_ultimo_estatus'] ?? '',
+        denuncia: json['denuncia'] ?? '',
+        dependenciaId: json['dependencia_id'] ?? 0,
+        dependencia: json['dependencia'] ?? '',
+        servicioId: json['servicio_id'] ?? 0,
+        servicio: json['servicio'] ?? '',
+        servicioUltimoEstatusId: json['servicio_ultimo_estatus_id'] ?? 0,
+        servicioUltimoEstatus: json['servicio_ultimo_estatus'] ?? '',
+        ultimoEstatusId: json['ultimo_estatus_id'] ?? 0,
+        ultimoEstatus: json['ultimo_estatus'] ?? '',
+        origenId: json['origen_id'] ?? 0,
+        origen: json['origen'] ?? '',
+        latitud: json['latitud'] ?? '',
+        longitud: json['longitud'] ?? '',
+        observaciones: json['observaciones'] ?? '',
+        imagenes: json['imagenes'] != null
+            ? List<Imagen>.from(json['imagenes'].map((x) => Imagen.fromJson(x)))
+            : [],
+        respuestas: json['respuestas'] != null
+            ? List<Respuesta>.from(json['respuestas'].map((x) => Respuesta.fromJson(x)))
+            : [],
     );
 
     Map<String, dynamic> toJson() => {
@@ -85,8 +89,8 @@ class Solicitud {
         'latitud': latitud,
         'longitud': longitud,
         'observaciones': observaciones,
-        'imagenes': List<dynamic>.from(imagenes!.map((x) => x!.toJson())),
-        'respuestas': List<dynamic>.from(respuestas!.map((x) => x!.toJson())),
+        'imagenes': imagenes != null ? List<dynamic>.from(imagenes!.map((x) => x?.toJson())) : [],
+        'respuestas': respuestas != null ? List<dynamic>.from(respuestas!.map((x) => x?.toJson())) : [],
     };
 }
 
