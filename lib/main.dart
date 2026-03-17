@@ -6,7 +6,6 @@ import 'package:sismmun/src/presentation/pages/home/HomePage.dart';
 import 'package:sismmun/src/presentation/pages/splash/SplashPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart' show MultiBlocProvider;
-import 'package:fluttertoast/fluttertoast.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +22,6 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: blocProviders,
       child: MaterialApp(
-        builder: FToastBuilder(),
         debugShowCheckedModeBanner: false,
         title: 'SISMMUN',
         theme: ThemeData(

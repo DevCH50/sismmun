@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:share_plus/share_plus.dart';
 
 import 'package:sismmun/src/domain/models/Solicitud.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
@@ -9,12 +7,26 @@ import 'package:sismmun/src/presentation/pages/home/bloc/HomeBloc.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/VisorImagenesCompleto.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/ImageUploaderHelper.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/ImageMetadataSheet.dart';
+import 'package:sismmun/src/presentation/pages/home/widget/SolicitudGaleria.dart';
 import 'package:sismmun/src/presentation/widgets/ResultDialog.dart';
 
-/// Widget que representa una solicitud en la lista
+/// Widget que representa una tarjeta de solicitud en la lista principal.
+///
+/// Muestra los datos de la solicitud ([Solicitud]) y permite:
+/// - Agregar imágenes sin cambiar el estatus.
+/// - Marcar la solicitud como Atendida (estatus 17) adjuntando una imagen.
+///
+/// La lógica de subida reside en [ImageUploaderHelper]; la galería de
+/// miniaturas es delegada a [SolicitudGaleria].
 class SolicitudItem extends StatefulWidget {
+  /// Solicitud a mostrar.
   final Solicitud solicitud;
+
+  /// Callback opcional invocado cuando se sube una imagen con éxito y
+  /// se cambia el estatus (marcar como atendida).
   final VoidCallback? onImageUploaded;
+
+  /// BLoC de la pantalla principal (requerido por el árbol de dependencias).
   final HomeBloc bloc;
 
   const SolicitudItem({
@@ -30,14 +42,22 @@ class SolicitudItem extends StatefulWidget {
 
 class _SolicitudItemState extends State<SolicitudItem> {
   final ImageUploaderHelper _imageUploader = ImageUploaderHelper();
+
+  /// Indica si hay una subida en proceso para deshabilitar controles.
   bool _isUploading = false;
+
+  /// Copia local de las imágenes, se actualiza al subir nuevas fotos.
   List<Imagen?> _imagenesLocales = [];
 
   @override
   void initState() {
     super.initState();
-   _imagenesLocales = List.from(widget.solicitud.imagenes ?? []);
+    _imagenesLocales = List.from(widget.solicitud.imagenes ?? []);
   }
+
+  // ---------------------------------------------------------------------------
+  // Build principal
+  // ---------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +74,13 @@ class _SolicitudItemState extends State<SolicitudItem> {
             _buildTitulo(),
             const SizedBox(height: 4),
             _buildServicio(),
-            if (_imagenesLocales.isNotEmpty) _buildGaleriaImagenes(),
+            if (_imagenesLocales.isNotEmpty)
+              SolicitudGaleria(
+                imagenes: _imagenesLocales,
+                isUploading: _isUploading,
+                onAgregarImagen: () => _procesarImagen(marcarAtendida: false),
+                onVerImagen: _mostrarImagenCompleta,
+              ),
             if (_imagenesLocales.isEmpty) _buildBotonAgregarImagen(),
             _buildBotonMarcarAtendida(),
           ],
@@ -63,7 +89,11 @@ class _SolicitudItemState extends State<SolicitudItem> {
     );
   }
 
-  /// Construye el título de la solicitud
+  // ---------------------------------------------------------------------------
+  // Sub-widgets de encabezado
+  // ---------------------------------------------------------------------------
+
+  /// Fila con fecha de ingreso (izquierda) e ID de solicitud (derecha).
   Widget _buildSolicitudId() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -88,6 +118,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
     );
   }
 
+  /// Título / descripción de la denuncia.
   Widget _buildTitulo() {
     return Text(
       widget.solicitud.denuncia,
@@ -101,7 +132,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
     );
   }
 
-  /// Construye la información del servicio
+  /// Nombre del servicio asociado a la solicitud.
   Widget _buildServicio() {
     return Text(
       widget.solicitud.servicio,
@@ -109,12 +140,14 @@ class _SolicitudItemState extends State<SolicitudItem> {
     );
   }
 
-  /// Botón para agregar imagen cuando no hay imágenes
+  /// Botón que aparece solo cuando la solicitud no tiene imágenes aún.
   Widget _buildBotonAgregarImagen() {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: TextButton.icon(
-        onPressed: _isUploading ? null : _agregarImagen,
+        onPressed: _isUploading
+            ? null
+            : () => _procesarImagen(marcarAtendida: false),
         icon: const Icon(Icons.add_photo_alternate, size: 18),
         label: const Text('+ Imagen'),
         style: TextButton.styleFrom(
@@ -125,195 +158,16 @@ class _SolicitudItemState extends State<SolicitudItem> {
     );
   }
 
-  /// Construye la galería de imágenes en scroll horizontal
-  Widget _buildGaleriaImagenes() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Etiqueta con cantidad de imágenes y botón agregar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildEtiquetaImagenes(),
-              TextButton.icon(
-                onPressed: _isUploading ? null : _agregarImagen,
-                icon: const Icon(Icons.add_photo_alternate, size: 16),
-                label: const Text('+ Imagen'),
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  foregroundColor: Colors.blue.shade700,
-                ),
-              ),
-            ],
-          ),
-
-          // Scroll horizontal de miniaturas
-          SizedBox(
-            height: 80,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _imagenesLocales.length,
-              itemBuilder: (context, index) => _buildMiniatura(index),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Construye la etiqueta que indica la cantidad de imágenes
-  Widget _buildEtiquetaImagenes() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        children: [
-          Icon(Icons.photo_library, size: 14, color: Colors.grey.shade600),
-          const SizedBox(width: 4),
-          Text(
-            '${_imagenesLocales.length} ${_imagenesLocales.length == 1 ? 'imagen' : 'imágenes'}',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Verifica si la URL es un PDF
-  bool _esPdf(String url) {
-    return url.toLowerCase().endsWith('.pdf');
-  }
-
-  /// Construye una miniatura de imagen o icono de PDF
-  Widget _buildMiniatura(int index) {
-    final imagen = _imagenesLocales[index];
-    if (imagen == null) return const SizedBox.shrink();
-    final bool esPdf = _esPdf(imagen.urlThumb) || _esPdf(imagen.urlImagen);
-
-    return GestureDetector(
-      onTap: () => esPdf ? _mostrarOpcionesPdf(imagen.urlImagen) : _mostrarImagenCompleta(index),
-      child: Container(
-        width: 80,
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300, width: 1),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: esPdf ? _buildPdfIcon() : Image.network(
-            imagen.urlThumb,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => _buildErrorImagen(),
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const Center(
-                child: CircularProgressIndicator(strokeWidth: 2),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Muestra modal con opciones para PDF (abrir o compartir)
-  void _mostrarOpcionesPdf(String url) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.open_in_browser),
-              title: const Text('Abrir PDF'),
-              onTap: () {
-                Navigator.pop(context);
-                _abrirPdf(url);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.share),
-              title: const Text('Compartir'),
-              onTap: () {
-                Navigator.pop(context);
-                _compartirPdf(url);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.cancel),
-              title: const Text('Cancelar'),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Abre el PDF en el navegador o app externa
-  Future<void> _abrirPdf(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  /// Comparte el enlace del PDF
-  Future<void> _compartirPdf(String url) async {
-    await Share.share(url, subject: 'Documento PDF');
-  }
-
-  /// Construye el icono de PDF
-  Widget _buildPdfIcon() {
-    return Container(
-      color: Colors.red.shade50,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.picture_as_pdf, color: Colors.red.shade700, size: 32),
-            const SizedBox(height: 4),
-            Text(
-              'PDF',
-              style: TextStyle(fontSize: 10, color: Colors.red.shade700, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Construye el widget de error de carga de imagen
-  Widget _buildErrorImagen() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.broken_image, color: Colors.grey, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            'Error',
-            style: TextStyle(fontSize: 8, color: Colors.grey.shade600),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Construye el botón para marcar como atendida
+  /// Botón principal para marcar la solicitud como atendida.
   Widget _buildBotonMarcarAtendida() {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          onPressed: _isUploading ? null : _marcarComoAtendida,
+          onPressed: _isUploading
+              ? null
+              : () => _procesarImagen(marcarAtendida: true),
           icon: _isUploading
               ? const SizedBox(
                   width: 16,
@@ -340,38 +194,20 @@ class _SolicitudItemState extends State<SolicitudItem> {
     );
   }
 
-  /// Agrega una imagen sin cambiar el estatus (soloImagen = true)
-  /// Solicita observación y tipo de foto (Antes/Después) antes de subir
-  Future<void> _agregarImagen() async {
-    // Paso 1: Seleccionar origen de la imagen
-    final origen = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Tomar Foto'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Seleccionar de Galería'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.cancel),
-              title: const Text('Cancelar'),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
+  // ---------------------------------------------------------------------------
+  // Lógica de imagen (métodos privados)
+  // ---------------------------------------------------------------------------
 
+  /// Flujo unificado para agregar imagen con o sin cambio de estatus.
+  ///
+  /// Si [marcarAtendida] es `true` se usa `estatusId = 17` y
+  /// `soloImagen = false`; si es `false` se conserva el estatus actual.
+  Future<void> _procesarImagen({required bool marcarAtendida}) async {
+    // Paso 1: Elegir origen (cámara o galería)
+    final origen = await _seleccionarOrigenImagen();
     if (origen == null) return;
 
-    // Paso 2: Capturar/seleccionar la imagen
+    // Paso 2: Capturar / seleccionar la imagen
     final picker = ImagePicker();
     final XFile? imagenSeleccionada = await picker.pickImage(
       source: origen,
@@ -379,121 +215,35 @@ class _SolicitudItemState extends State<SolicitudItem> {
       maxHeight: 1024,
       imageQuality: 80,
     );
-
     if (imagenSeleccionada == null || !mounted) return;
 
-    // Paso 3: Mostrar modal para ingresar metadatos (observación y tipo)
+    // Paso 3: Recopilar metadatos (observación y tipo de foto)
     final metadatos = await ImageMetadataSheet.show(
       context,
       imagenSeleccionada.path,
     );
-
     if (metadatos == null || !mounted) return;
 
-    // Paso 4: Subir imagen con metadatos
-    // Conserva el estatus actual de la solicitud (NO marca como Atendida)
+    // Paso 4: Subir imagen
     setState(() => _isUploading = true);
 
     final result = await _imageUploader.subirImagenConMetadatos(
       imagenPath: imagenSeleccionada.path,
       solicitudId: widget.solicitud.solicitudId,
       dependenciaId: widget.solicitud.dependenciaId,
-      estatusId: widget.solicitud.ultimoEstatusId, // Conserva estatus actual
+      estatusId: marcarAtendida ? 17 : widget.solicitud.ultimoEstatusId,
       servicioId: widget.solicitud.servicioId,
       observacion: metadatos.observacion,
       tipoFoto: metadatos.tipoFoto,
-      soloImagen: true,
+      soloImagen: !marcarAtendida,
       onImageUploaded: (imagen) {
-        setState(() {
-          _imagenesLocales.add(imagen);
-        });
+        setState(() => _imagenesLocales.add(imagen));
       },
     );
 
     setState(() => _isUploading = false);
 
-    // Mostrar diálogo del resultado
-    if (result != null && mounted) {
-      await ResultDialog.show(
-        context,
-        type: result.success ? ResultType.success : ResultType.error,
-        message: result.message,
-      );
-    }
-  }
-
-  /// Marca la solicitud como atendida con imagen y metadatos
-  /// Cambia el estatus a 17 (Atendida)
-  Future<void> _marcarComoAtendida() async {
-    // Paso 1: Seleccionar origen de la imagen
-    final origen = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Tomar Foto'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Seleccionar de Galería'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.cancel),
-              title: const Text('Cancelar'),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (origen == null) return;
-
-    // Paso 2: Capturar/seleccionar la imagen
-    final picker = ImagePicker();
-    final XFile? imagenSeleccionada = await picker.pickImage(
-      source: origen,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 80,
-    );
-
-    if (imagenSeleccionada == null || !mounted) return;
-
-    // Paso 3: Mostrar modal para ingresar metadatos (observación y tipo)
-    final metadatos = await ImageMetadataSheet.show(
-      context,
-      imagenSeleccionada.path,
-    );
-
-    if (metadatos == null || !mounted) return;
-
-    // Paso 4: Subir imagen con metadatos y marcar como Atendida (17)
-    setState(() => _isUploading = true);
-
-    final result = await _imageUploader.subirImagenConMetadatos(
-      imagenPath: imagenSeleccionada.path,
-      solicitudId: widget.solicitud.solicitudId,
-      dependenciaId: widget.solicitud.dependenciaId,
-      estatusId: 17, // Marca como Atendida
-      servicioId: widget.solicitud.servicioId,
-      observacion: metadatos.observacion,
-      tipoFoto: metadatos.tipoFoto,
-      soloImagen: false, // Cambia el estatus
-      onImageUploaded: (imagen) {
-        setState(() {
-          _imagenesLocales.add(imagen);
-        });
-      },
-    );
-
-    setState(() => _isUploading = false);
-
-    // Mostrar diálogo del resultado
+    // Paso 5: Mostrar resultado
     if (result != null && mounted) {
       await ResultDialog.show(
         context,
@@ -501,18 +251,48 @@ class _SolicitudItemState extends State<SolicitudItem> {
         message: result.message,
       );
 
-      // Si fue exitoso, notificar para refrescar la lista
-      if (result.success && widget.onImageUploaded != null) {
+      // Notificar al padre solo cuando se marcó como atendida con éxito
+      if (marcarAtendida && result.success && widget.onImageUploaded != null) {
         widget.onImageUploaded!();
       }
     }
   }
 
-  /// Muestra la imagen en pantalla completa
+  /// Muestra un bottom sheet para que el usuario elija cámara o galería.
+  ///
+  /// Devuelve el [ImageSource] seleccionado, o `null` si cancela.
+  Future<ImageSource?> _seleccionarOrigenImagen() {
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Tomar Foto'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Seleccionar de Galería'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.cancel),
+              title: const Text('Cancelar'),
+              onTap: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Abre el [VisorImagenesCompleto] en el índice indicado.
   void _mostrarImagenCompleta(int indice) {
     showDialog(
       context: context,
-      builder: (context) => VisorImagenesCompleto(
+      builder: (_) => VisorImagenesCompleto(
         imagenes: _imagenesLocales,
         indiceInicial: indice,
       ),

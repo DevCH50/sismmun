@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:sismmun/src/data/dataSource/local/SharedPref.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
 
+/// Drawer lateral principal de la pantalla Home.
+///
+/// Muestra el nombre del usuario autenticado, las versiones de la app y la API,
+/// y el botón para cerrar sesión.
 class HomeDrawer extends StatelessWidget {
+  /// Callback que se ejecuta cuando el usuario confirma cerrar sesión
   final VoidCallback onLogout;
 
   const HomeDrawer({super.key, required this.onLogout});
 
+  /// Lee la sesión guardada localmente para mostrar los datos del usuario
   Future<AuthResponse?> _getSession() async {
     final sharedPref = SharedPref();
     final data = await sharedPref.read('user');
@@ -27,6 +33,7 @@ class HomeDrawer extends StatelessWidget {
           return ListView(
             padding: EdgeInsets.zero,
             children: [
+              // Encabezado con gradiente rojo corporativo y datos del usuario
               DrawerHeader(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
@@ -52,6 +59,8 @@ class HomeDrawer extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // Información de versiones de app y API
               ListTile(
                 leading: const Icon(Icons.info_outline),
                 title: const Text('Versiones'),
@@ -60,6 +69,8 @@ class HomeDrawer extends StatelessWidget {
                 ),
               ),
               const Divider(),
+
+              // Opción para cerrar sesión
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
                 title: const Text('Cerrar Sesion'),
