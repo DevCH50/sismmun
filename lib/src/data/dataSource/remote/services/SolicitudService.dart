@@ -52,7 +52,7 @@ class SolicitudService {
         'imagen': imagenBase64,
         'latitud': request.latitud ?? 0,
         'longitud': request.longitud ?? 0,
-        'observaciones': request.observaciones ?? '',
+        'observacion': request.observaciones ?? '',
         'tipo_foto': request.tipoFoto?.valor ?? '',
       };
 

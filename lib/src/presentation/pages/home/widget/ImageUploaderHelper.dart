@@ -25,7 +25,7 @@ class ImageUploaderHelper {
     required Function(bool) onUploadingChanged,
     Function(Imagen)? onImageUploaded,
     bool soloImagen = false,
-    String? observacion,
+    String? observaciones,
     TipoFoto? tipoFoto,
   }) async {
     try {
@@ -53,7 +53,7 @@ class ImageUploaderHelper {
         latitud: ubicacion?.latitude,
         longitud: ubicacion?.longitude,
         soloImagen: soloImagen,
-        observacion: observacion,
+        observaciones: observaciones,
         tipoFoto: tipoFoto,
       );
 
@@ -99,7 +99,7 @@ class ImageUploaderHelper {
     required int dependenciaId,
     required int estatusId,
     required int servicioId,
-    required String observacion,
+    required String observaciones,
     required TipoFoto tipoFoto,
     Function(Imagen)? onImageUploaded,
     bool soloImagen = false,
@@ -118,7 +118,7 @@ class ImageUploaderHelper {
         latitud: ubicacion?.latitude,
         longitud: ubicacion?.longitude,
         soloImagen: soloImagen,
-        observacion: observacion,
+        observaciones: observaciones,
         tipoFoto: tipoFoto,
       );
 
