@@ -1,5 +1,6 @@
 import 'package:sismmun/injection.dart';
 import 'package:sismmun/src/blocProvider.dart';
+import 'package:sismmun/src/core/theme/app_theme.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/LoginPage.dart';
 import 'package:sismmun/src/presentation/pages/auth/register/RegisterPage.dart';
 import 'package:sismmun/src/presentation/pages/home/HomePage.dart';
@@ -24,17 +25,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'SISMMUN',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-            brightness: Brightness.dark,
-          ),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
         themeMode: ThemeMode.system,
         routes: {
           'login': (BuildContext context) => const LoginPage(),

@@ -34,8 +34,8 @@ class LogoRedondoUno extends StatelessWidget {
         child: Image.asset(
           'assets/img/favicon-512-512.png',
           fit: BoxFit.contain,
-          width: 150,
-          height: 150,
+          width: 98,
+          height: 98,
         ),
       ),
     );

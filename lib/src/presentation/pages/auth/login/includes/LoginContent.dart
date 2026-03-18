@@ -23,14 +23,13 @@ class LoginContent extends StatelessWidget {
           key: state.formKey,
           child: Container(
             width: MediaQuery.of(context).size.width * 0.85,
-            height: MediaQuery.of(context).size.height * 0.75,
             decoration: BoxDecoration(
               color: Colors.white54.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(50),
             ),
-            padding: const EdgeInsets.all(20),
-            child: SingleChildScrollView(
-              child: Column(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+            margin: const EdgeInsets.symmetric(vertical: 24),
+            child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Icon(Icons.person, size: 125, color: Colors.white),
@@ -118,7 +117,6 @@ class LoginContent extends StatelessWidget {
                     icono: Icons.work_off,
                   ),
                 ],
-              ),
             ),
           ),
         );
