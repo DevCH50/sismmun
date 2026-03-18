@@ -1,40 +1,65 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:sismmun/src/core/constants/app_durations.dart';
+import 'package:sismmun/src/core/constants/app_strings.dart';
+import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
+import 'package:sismmun/src/data/api/endpoints.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
 import 'package:sismmun/src/domain/utils/ListToString.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
-import 'package:http/http.dart' as http;
 
+/// Servicio HTTP para operaciones de autenticación.
+///
+/// Maneja las peticiones al API para login de usuarios.
+/// Incluye timeout y manejo de errores de conexión.
 class AuthService {
+  /// Realiza el login del usuario contra el servidor.
+  ///
+  /// [username] - Nombre de usuario o email.
+  /// [password] - Contraseña del usuario.
+  /// Retorna [Success] con [AuthResponse] o [Error] con mensaje.
   Future<Resource<AuthResponse>> login(String username, String password) async {
-    // Implement login logic here
+    final Uri url = ApiConfig.buildUri(Endpoints.login);
+
+    AppLogger.httpRequest('POST', url.toString());
+
     try {
-      // Uri url = Uri.https(ApiConfig.baseUrl, "/api/v1/login");
-      final Uri url = ApiConfig.buildUri('/api/v1/login');
       final Map<String, String> headers = {'Content-Type': 'application/json'};
       final String bodyParams = json.encode({
         'username': username,
         'password': password,
       });
+
       final response = await http
           .post(url, headers: headers, body: bodyParams)
-          .timeout(const Duration(seconds: 30));
+          .timeout(AppDurations.httpTimeout);
+
       final data = json.decode(response.body);
-      if ((response.statusCode == 200 || response.statusCode == 201) && data['access_token'] != null) {
+
+      AppLogger.httpResponse(response.statusCode, url.toString());
+
+      if ((response.statusCode == 200 || response.statusCode == 201) &&
+          data['access_token'] != null) {
         final AuthResponse authResponse = AuthResponse.fromJson(data);
+        AppLogger.info('Login exitoso para usuario: $username', tag: 'Auth');
         return Success(authResponse);
       } else {
-        return Error(ListToString(data['msg']).isNotEmpty
-            ? ListToString(data['msg'])
-            : 'Credenciales incorrectas o acceso denegado');
+        final errorMsg = ListToString(
+          data['msg'] ?? data['message'] ?? data['error'] ?? AppStrings.errorInvalidCredentials,
+        );
+        AppLogger.warning('Login fallido: $errorMsg', tag: 'Auth');
+        return Error(
+          errorMsg.isNotEmpty ? errorMsg : AppStrings.errorInvalidCredentials,
+        );
       }
     } on TimeoutException {
-      return Error('Tiempo de espera agotado. Verifica tu conexión.');
+      AppLogger.error('Timeout en login', tag: 'Auth');
+      return Error(AppStrings.errorTimeout);
     } catch (e) {
-      if (kDebugMode) print('Error en el Server => $e');
-      return Error('Error de conexión. Intenta de nuevo.');
+      AppLogger.error('Error en login: $e', tag: 'Auth');
+      return Error(AppStrings.errorConnectionRetry);
     }
   }
 }

@@ -1,83 +1,88 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:sismmun/src/core/constants/app_durations.dart';
+import 'package:sismmun/src/core/constants/app_strings.dart';
+import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
-import 'package:sismmun/src/domain/models/SolicitudesResponse.dart';
+import 'package:sismmun/src/data/api/endpoints.dart';
+import 'package:sismmun/src/data/dataSource/local/SharedPref.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
+import 'package:sismmun/src/domain/models/SolicitudesResponse.dart';
 import 'package:sismmun/src/domain/useCases/auth/AuthUseCases.dart';
 import 'package:sismmun/src/domain/utils/ListToString.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
-import 'package:http/http.dart' as http;
 
-import 'package:sismmun/src/data/dataSource/local/SharedPref.dart';
-
+/// Servicio HTTP para obtener las solicitudes del usuario.
+///
+/// Se comunica con el backend ServiMun para traer las denuncias/solicitudes
+/// asociadas al usuario autenticado. Requiere token Bearer válido.
 class HomeService {
   final SharedPref sharedPref;
   final AuthUseCases authUseCases;
 
-  // ✅ Inyectar SharedPref
   HomeService(this.sharedPref, this.authUseCases);
 
+  /// Obtiene las solicitudes del usuario autenticado.
+  ///
+  /// Usa el token de sesión para autenticar la petición.
+  /// Retorna [Success] con [SolicitudesResponse] o [Error] con mensaje.
   Future<Resource<SolicitudesResponse>> getSolicitudes() async {
     try {
-      // ✅ Obtener userId y token de la sesión
-
       final AuthResponse? authResponse = await authUseCases.getUserSession.run();
-      int userId = 0;
-      String token = '';
-      if (authResponse != null) {
-        if (kDebugMode) print('USUARIO id: ${authResponse.user.id}');
-        userId = authResponse.user.id;
-        token = authResponse.accessToken;
-      } else {
-        return Error<SolicitudesResponse>('⚠️ No hay sesión activa');
+
+      if (authResponse == null) {
+        return Error<SolicitudesResponse>(AppStrings.errorNoSession);
       }
 
-      // Validar que existan
+      final int userId = authResponse.user.id;
+      final String token = authResponse.accessToken;
+
       if (userId == 0) {
-        return Error<SolicitudesResponse>(
-          'No se encontró el ID de usuario en la sesión',
-        );
+        return Error<SolicitudesResponse>(AppStrings.errorNoUserId);
       }
 
       if (token.isEmpty) {
-        return Error<SolicitudesResponse>(
-          'No se encontró el token de autenticación',
-        );
+        return Error<SolicitudesResponse>(AppStrings.errorNoToken);
       }
 
-      // ✅ Usar el userId dinámicamente en la URL
-      // Uri url = Uri.https(ApiConfig.baseUrl, "/api/v1/Homes/$userId");
+      final Uri url = ApiConfig.buildUri(Endpoints.solicitudes);
 
-      final Uri url = ApiConfig.buildUri('/api/v1/denuncias/with/roles');
+      AppLogger.httpRequest('POST', url.toString());
+      AppLogger.debug('userId: $userId', tag: 'Home');
 
-      if (kDebugMode) print('🎬 HomesService: url $url');
-
-      // ✅ Agregar el Bearer token
       final Map<String, String> headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       };
-      final String bodyParams = json.encode({
-        'user_id': userId,
-      });
+      final String bodyParams = json.encode({'user_id': userId});
 
       final response = await http
           .post(url, headers: headers, body: bodyParams)
-          .timeout(const Duration(seconds: 30));
+          .timeout(AppDurations.httpTimeout);
+
       final data = json.decode(response.body);
+
+      AppLogger.httpResponse(response.statusCode, url.toString());
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final SolicitudesResponse solicitudesResponse = SolicitudesResponse.fromJson(data);
+        AppLogger.info(
+          'Solicitudes cargadas: ${solicitudesResponse.solicitudes.length}',
+          tag: 'Home',
+        );
         return Success(solicitudesResponse);
       } else {
-        return Error<SolicitudesResponse>(ListToString(data['msg']));
+        final errorMsg = ListToString(data['msg']);
+        AppLogger.warning('Error al obtener solicitudes: $errorMsg', tag: 'Home');
+        return Error<SolicitudesResponse>(errorMsg);
       }
     } on TimeoutException {
-      return Error<SolicitudesResponse>('Tiempo de espera agotado. Verifica tu conexión.');
+      AppLogger.error('Timeout al obtener solicitudes', tag: 'Home');
+      return Error<SolicitudesResponse>(AppStrings.errorTimeout);
     } catch (e) {
-      if (kDebugMode) print('Error en el Server => $e');
-      return Error<SolicitudesResponse>('Error de conexión. Intenta de nuevo.');
+      AppLogger.error('Error en getSolicitudes: $e', tag: 'Home');
+      return Error<SolicitudesResponse>(AppStrings.errorConnectionRetry);
     }
   }
 }

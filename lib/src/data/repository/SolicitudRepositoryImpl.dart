@@ -41,7 +41,7 @@ class SolicitudRepositoryImpl implements SolicitudRepository {
         latitud: request.latitud,
         longitud: request.longitud,
         soloImagen: request.soloImagen,
-        observacion: request.observacion,
+        observaciones: request.observaciones,
         tipoFoto: request.tipoFoto,
       );
 

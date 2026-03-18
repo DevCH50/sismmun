@@ -90,3 +90,152 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 - Asuegurate de que todos los modulos tengan su test y que todos pasen satisfactoriamente.
 - Asegurate de de seguir al pie de la letra las reglas de este .md
 - Para tareas especifica, usa subagentes que te ayuden a resolver mas rápido.
+- Usar siempre `Endpoints` para los paths del API (no strings hardcodeados)
+- Usar siempre `AppStrings` para los textos de error y UI
+- Usar siempre `AppDurations` para timeouts y duraciones
+- Usar siempre `AppLogger` en lugar de `print` o `kDebugMode print`
+
+---
+
+## Tareas Terminadas ✅
+
+| Fecha | Tarea |
+|---|---|
+| 2026-03-12 | ResultDialog: Reemplazo de SnackBar/Toast con tipos success/error/warning/info |
+| 2026-03-12 | Modal de metadatos de imagen (observación, tipo Antes/Después) |
+| 2026-03-12 | Buscador de solicitudes con filtrado local en tiempo real |
+| 2026-03-17 | Corrección de bugs críticos iOS/Android + 60 tests |
+| 2026-03-17 | Configurar firma release y applicationId para Google Play Store |
+| 2026-03-18 | Buenas prácticas de arjipagos: `endpoints.dart`, `AppLogger`, `AppStrings`, `AppDurations`, `ApiConfig` mejorado |
+
+---
+
+## Próximas Tareas 📋
+
+### 1. Subida múltiple de imágenes desde galería
+
+**Descripción:** Actualmente el usuario solo puede seleccionar una imagen por vez. Se debe permitir seleccionar múltiples imágenes del carrete en una sola operación.
+
+**Alcance Flutter:**
+- Modificar `ImageUploaderHelper` para aceptar selección múltiple usando `ImagePicker` con `pickMultiImage()`
+- Modificar `ImageMetadataSheet` para mostrar previsualizaciones de múltiples imágenes (carrusel o grid)
+- Modificar `SolicitudItem` para encolar y subir las imágenes secuencialmente o en paralelo
+- Agregar indicador de progreso con contador (ej: "Subiendo 2 de 5...")
+- Manejar errores parciales (si una falla, continuar con las demás)
+
+**Dependencias Flutter ya disponibles:** `image_picker` ya está en `pubspec.yaml`
+
+**Endpoint a usar:** `Endpoints.agregarImagen` (se llama N veces, una por imagen)
+
+**Documentación para el backend (ServiMun - Laravel 7, PHP 7.4):**
+
+El backend recibe **una imagen por petición** (no multipart batch). Para subir múltiples imágenes, el cliente Flutter hace varias llamadas al mismo endpoint:
+
+```
+POST /api/v1/denuncia/agregar/imagen
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "user_id": 123,
+  "denuncia_id": 456,
+  "dependencia_id": 789,
+  "estatus_id": 101,
+  "servicio_id": 202,
+  "solo_imagen": 0,
+  "imagen": "{base64_de_la_imagen}",
+  "latitud": 18.0,
+  "longitud": -93.0,
+  "observacion": "Descripción de la imagen",
+  "tipo_foto": "antes"   // o "despues"
+}
+```
+
+**Respuesta esperada del backend:**
+```json
+{
+  "status": 1,
+  "msg": "Imagen guardada correctamente",
+  "url_imagen": "https://siac.villahermosa.gob.mx/storage/...",
+  "url_thumb": "https://siac.villahermosa.gob.mx/storage/..."
+}
+```
+
+**No se requieren cambios en el backend** para la subida múltiple, ya que Flutter realiza llamadas secuenciales al mismo endpoint existente.
+
+---
+
+### 2. Notificaciones Push desde el backend
+
+**Descripción:** Implementar recepción de notificaciones push enviadas directamente desde el backend ServiMun.
+
+**Alcance Flutter:**
+- Integrar `firebase_messaging` (FCM) o alternativa como `flutter_local_notifications`
+- Registrar el token del dispositivo y enviarlo al servidor en el login
+- Manejar notificaciones en primer plano, segundo plano y con app cerrada
+- Mostrar notificación con `ResultDialog` o `flutter_local_notifications` según corresponda
+- Guardar historial de notificaciones localmente con `shared_preferences`
+
+**Permisos necesarios:**
+
+Android (`AndroidManifest.xml`):
+```xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+```
+
+iOS (`Info.plist`): Solicitar permiso en runtime con `firebase_messaging`.
+
+**Documentación para el backend (ServiMun - Laravel 7, PHP 7.4):**
+
+El backend necesita:
+
+1. **Nuevo campo en tabla `users`:** `fcm_token` (string, nullable)
+
+   ```sql
+   ALTER TABLE users ADD COLUMN fcm_token VARCHAR(255) NULL;
+   ```
+
+2. **Endpoint para registrar el token del dispositivo:**
+
+   ```
+   POST /api/v1/usuario/fcm-token
+   Authorization: Bearer {token}
+   Content-Type: application/json
+
+   {
+     "user_id": 123,
+     "fcm_token": "dGhpcyBpcyBhIHRlc3QgdG9rZW4..."
+   }
+   ```
+
+3. **Servicio para enviar notificaciones** (usando Firebase Admin SDK o HTTP v1 API):
+
+   ```php
+   // Ejemplo en PHP usando cURL
+   $url = 'https://fcm.googleapis.com/v1/projects/{PROJECT_ID}/messages:send';
+   $headers = [
+     'Authorization: Bearer ' . $accessToken,
+     'Content-Type: application/json',
+   ];
+   $data = [
+     'message' => [
+       'token' => $fcmToken,
+       'notification' => [
+         'title' => 'SisMMun',
+         'body' => 'Tu solicitud #123 fue actualizada',
+       ],
+       'data' => [
+         'solicitud_id' => '123',
+         'tipo' => 'actualizacion',
+       ],
+     ],
+   ];
+   ```
+
+4. **Disparar notificación** cuando cambia el estatus de una denuncia:
+   - En el controlador o modelo `Denuncia`, al guardar un nuevo estatus,
+     buscar el `fcm_token` del usuario dueño y enviar la notificación.
+
+**Referencias:**
+- Firebase Console: https://console.firebase.google.com
+- FCM HTTP v1 API: https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send

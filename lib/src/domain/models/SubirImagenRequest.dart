@@ -35,7 +35,7 @@ class SubirImagenRequest {
   final double? latitud;
   final double? longitud;
   final bool soloImagen;
-  final String? observacion; // Observación de la imagen
+  final String? observaciones; // Observación de la imagen
   final TipoFoto? tipoFoto; // Antes o Después
 
   SubirImagenRequest({
@@ -47,7 +47,7 @@ class SubirImagenRequest {
     this.latitud,
     this.longitud,
     this.soloImagen = false,
-    this.observacion,
+    this.observaciones,
     this.tipoFoto,
   });
 
@@ -61,7 +61,7 @@ class SubirImagenRequest {
       'latitud': latitud?.toString() ?? '',
       'longitud': longitud?.toString() ?? '',
       'solo_imagen': soloImagen ? '1' : '0',
-      'observacion': observacion ?? '',
+      'observacion': observaciones ?? '',
       'tipo_foto': tipoFoto?.valor ?? '',
     };
   }
