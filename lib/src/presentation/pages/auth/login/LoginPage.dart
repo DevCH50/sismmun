@@ -14,28 +14,43 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   LoginBloc? bloc;
+  final ScrollController _scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Cuando aparece el teclado, hace scroll al final para que el botón
+  /// "Iniciar Sesión" (debajo del campo de contraseña) quede visible.
+  void _scrollAlFinal() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     bloc = BlocProvider.of<LoginBloc>(context);
 
-    // keyboardHeight se usa para extender el fondo detrás del teclado
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
+    // Cada vez que el teclado aparece, desplaza hasta el final del scroll
+    if (keyboardHeight > 0) _scrollAlFinal();
+
     return Scaffold(
-      // true: el body encoge cuando aparece el teclado → Flutter hace scroll
-      // automático al campo enfocado sin intervención manual
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Fondo extendido con bottom negativo para cubrir también detrás
-          // del teclado aunque el Scaffold haya encogido el body
+          // Fondo extendido para cubrir también detrás del teclado
           Positioned(
             top: 0,
             left: 0,
@@ -47,10 +62,10 @@ class _LoginPageState extends State<LoginPage> {
           // Listener de respuesta (no visual)
           LoginResponse(bloc),
 
-          // SafeArea + SingleChildScrollView: Flutter mueve automáticamente
-          // el scroll para que el campo activo quede siempre visible
+          // Scroll controlado: al aparecer el teclado lleva el botón a la vista
           SafeArea(
             child: SingleChildScrollView(
+              controller: _scrollController,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Center(child: LoginContent(bloc)),
