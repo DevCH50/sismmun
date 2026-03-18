@@ -61,7 +61,7 @@ class SubirImagenRequest {
       'latitud': latitud?.toString() ?? '',
       'longitud': longitud?.toString() ?? '',
       'solo_imagen': soloImagen ? '1' : '0',
-      'observacion': observaciones ?? '',
+      'observaciones': observaciones ?? '',
       'tipo_foto': tipoFoto?.valor ?? '',
     };
   }

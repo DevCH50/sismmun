@@ -64,7 +64,7 @@ void main() {
       expect(request.tipoFoto, equals(TipoFoto.despues));
     });
 
-    test('toMap incluye clave "observacion" (singular) para el backend', () {
+    test('toMap incluye clave "observaciones" (plural) para el backend', () {
       final request = SubirImagenRequest(
         solicitudId: 1,
         dependenciaId: 2,
@@ -75,9 +75,9 @@ void main() {
         tipoFoto: TipoFoto.antes,
       );
       final map = request.toMap();
-      expect(map.containsKey('observacion'), isTrue,
-          reason: 'El backend espera la clave "observacion" (singular)');
-      expect(map['observacion'], equals('Test'));
+      expect(map.containsKey('observaciones'), isTrue,
+          reason: 'El backend espera la clave "observaciones" (plural)');
+      expect(map['observaciones'], equals('Test'));
     });
 
     test('toMap incluye clave "tipo_foto" con valor correcto', () {
