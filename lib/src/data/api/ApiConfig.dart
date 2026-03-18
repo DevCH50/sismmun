@@ -19,9 +19,9 @@ class ApiConfig {
   /// IP del emulador Android (apunta al localhost de la PC host)
   static const String emulatorUrl = '10.0.2.2:8000';
 
-  /// IP del servidor ServiMun en Vagrant (red host-only).
-  /// Ver CLAUDE.md del backend: /home/carlos/Projects/Laravel/ServiMun
-  static const String physicalDeviceUrl = '192.168.90.10:8000';
+  /// IP de la PC host en la red WiFi local (puerto 8000 escucha en 0.0.0.0).
+  /// Actualizar si cambia la IP: hostname -I | awk '{print $1}'
+  static const String physicalDeviceUrl = '192.168.1.85:8000';
 
   /// Indica si se prueba en dispositivo físico (true) o emulador (false).
   static const bool isPhysicalDevice = true;
