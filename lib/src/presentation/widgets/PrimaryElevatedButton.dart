@@ -28,16 +28,19 @@ class PrimaryElevatedButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Elige blanco o negro según el brillo del fondo para garantizar legibilidad
+    final brightness = ThemeData.estimateBrightnessForColor(color);
+    final textColor = brightness == Brightness.dark ? Colors.white : Colors.black87;
+
     return ElevatedButton(
-      onPressed: () {
-        onPressed();
-      },
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
+        foregroundColor: textColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
       ),
-      child: Text(text, style: const TextStyle(fontSize: 18, color: Colors.black54)),
+      child: Text(text, style: TextStyle(fontSize: 18, color: textColor)),
     );
   }
 }
