@@ -24,30 +24,36 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     bloc = BlocProvider.of<LoginBloc>(context);
 
+    // keyboardHeight se usa para extender el fondo detrás del teclado
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      // false: el Stack no encoge, el fondo siempre llena la pantalla
-      resizeToAvoidBottomInset: false,
+      // true: el body encoge cuando aparece el teclado → Flutter hace scroll
+      // automático al campo enfocado sin intervención manual
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Fondo siempre cubre toda la pantalla
-          const Positioned.fill(child: LoginBackGround()),
+          // Fondo extendido con bottom negativo para cubrir también detrás
+          // del teclado aunque el Scaffold haya encogido el body
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: -keyboardHeight,
+            child: const LoginBackGround(),
+          ),
 
           // Listener de respuesta (no visual)
           LoginResponse(bloc),
 
-          // Formulario: padding bottom = altura del teclado → el contenido sube
-          SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.only(bottom: keyboardHeight),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: screenHeight),
-              child: SafeArea(
-                child: Center(child: LoginContent(bloc)),
-              ),
+          // SafeArea + SingleChildScrollView: Flutter mueve automáticamente
+          // el scroll para que el campo activo quede siempre visible
+          SafeArea(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(child: LoginContent(bloc)),
             ),
           ),
         ],
