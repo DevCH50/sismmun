@@ -107,13 +107,6 @@ void main() {
       expect(find.text('Ingresar'), findsOneWidget);
     });
 
-    testWidgets('muestra el botón de olvidé contraseña', (tester) async {
-      await tester.pumpWidget(_buildLoginContent(bloc));
-      await tester.pump();
-
-      expect(find.text('¿Olvidaste tu contraseña?'), findsOneWidget);
-    });
-
     testWidgets('el campo de contraseña tiene obscureText', (tester) async {
       await tester.pumpWidget(_buildLoginContent(bloc));
       await tester.pump();

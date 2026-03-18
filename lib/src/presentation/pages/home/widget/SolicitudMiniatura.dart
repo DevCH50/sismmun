@@ -129,10 +129,27 @@ class SolicitudMiniatura extends StatelessWidget {
   // Build
   // ---------------------------------------------------------------------------
 
+  /// Etiqueta legible del tipo de foto ("Antes" / "Después").
+  String get _etiquetaTipo {
+    final tipo = imagen.tipoFoto.trim().toLowerCase();
+    if (tipo == 'despues' || tipo == 'después') return 'Después';
+    if (tipo == 'antes') return 'Antes';
+    return tipo.isNotEmpty ? tipo : '';
+  }
+
+  /// Color de fondo de la etiqueta según el tipo.
+  Color get _colorEtiqueta {
+    final tipo = imagen.tipoFoto.trim().toLowerCase();
+    if (tipo == 'despues' || tipo == 'después') return Colors.green.shade700;
+    if (tipo == 'antes') return Colors.orange.shade700;
+    return Colors.black54;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool esPdf =
         _esPdf(imagen.urlThumb) || _esPdf(imagen.urlImagen);
+    final String etiqueta = _etiquetaTipo;
 
     return GestureDetector(
       onTap: esPdf
@@ -147,19 +164,51 @@ class SolicitudMiniatura extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: esPdf
-              ? _buildPdfIcon()
-              : Image.network(
-                  ApiConfig.fixImageUrl(imagen.urlThumb),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => _buildErrorImagen(),
-                  loadingBuilder: (_, child, progress) {
-                    if (progress == null) return child;
-                    return const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    );
-                  },
+          child: Stack(
+            children: [
+              // Imagen o ícono PDF
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: esPdf
+                    ? _buildPdfIcon()
+                    : Image.network(
+                        ApiConfig.fixImageUrl(imagen.urlThumb),
+                        fit: BoxFit.cover,
+                        width: 80,
+                        height: 80,
+                        errorBuilder: (context, error, _) => _buildErrorImagen(),
+                        loadingBuilder: (_, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          );
+                        },
+                      ),
+              ),
+
+              // Etiqueta tipo_foto en la parte inferior
+              if (etiqueta.isNotEmpty)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    color: _colorEtiqueta.withValues(alpha: 0.85),
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Text(
+                      etiqueta,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
+            ],
+          ),
         ),
       ),
     );
