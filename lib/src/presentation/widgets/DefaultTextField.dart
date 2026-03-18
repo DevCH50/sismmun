@@ -63,6 +63,7 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
       validator: widget.validator,
       keyboardType: widget.keyboardType,
       decoration: InputDecoration(
+        filled: false,
         label: Text(widget.label, style: const TextStyle(color: Colors.white)),
         errorText: widget.errorText,
         // ✅ Estilo de error personalizable
