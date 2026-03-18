@@ -85,20 +85,20 @@ class SolicitudMiniatura extends StatelessWidget {
   // ---------------------------------------------------------------------------
 
   /// Icono decorativo que representa un archivo PDF.
-  Widget _buildPdfIcon() {
+  Widget _buildPdfIcon(ColorScheme cs) {
     return Container(
-      color: Colors.red.shade50,
+      color: cs.errorContainer,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.picture_as_pdf, color: Colors.red.shade700, size: 32),
+            Icon(Icons.picture_as_pdf, color: cs.error, size: 32),
             const SizedBox(height: 4),
             Text(
               'PDF',
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.red.shade700,
+                color: cs.error,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -109,16 +109,16 @@ class SolicitudMiniatura extends StatelessWidget {
   }
 
   /// Widget de sustitución cuando la imagen no pudo cargarse.
-  Widget _buildErrorImagen() {
+  Widget _buildErrorImagen(ColorScheme cs) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.broken_image, color: Colors.grey, size: 24),
+          Icon(Icons.broken_image, color: cs.onSurfaceVariant, size: 24),
           const SizedBox(height: 4),
           Text(
             'Error',
-            style: TextStyle(fontSize: 8, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 8, color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -137,19 +137,20 @@ class SolicitudMiniatura extends StatelessWidget {
     return tipo.isNotEmpty ? tipo : '';
   }
 
-  /// Color de fondo de la etiqueta según el tipo.
-  Color get _colorEtiqueta {
-    final tipo = imagen.tipoFoto.trim().toLowerCase();
-    if (tipo == 'despues' || tipo == 'después') return Colors.green.shade700;
-    if (tipo == 'antes') return Colors.orange.shade700;
-    return Colors.black54;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final bool esPdf =
         _esPdf(imagen.urlThumb) || _esPdf(imagen.urlImagen);
     final String etiqueta = _etiquetaTipo;
+
+    // Color semántico de la etiqueta según tipo_foto
+    final Color colorEtiqueta = () {
+      final tipo = imagen.tipoFoto.trim().toLowerCase();
+      if (tipo == 'despues' || tipo == 'después') return cs.primary;
+      if (tipo == 'antes') return cs.secondary;
+      return cs.onSurface;
+    }();
 
     return GestureDetector(
       onTap: esPdf
@@ -160,7 +161,7 @@ class SolicitudMiniatura extends StatelessWidget {
         margin: const EdgeInsets.only(right: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300, width: 1),
+          border: Border.all(color: cs.outlineVariant, width: 1),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
@@ -171,17 +172,20 @@ class SolicitudMiniatura extends StatelessWidget {
                 width: 80,
                 height: 80,
                 child: esPdf
-                    ? _buildPdfIcon()
+                    ? _buildPdfIcon(cs)
                     : Image.network(
                         ApiConfig.fixImageUrl(imagen.urlThumb),
                         fit: BoxFit.cover,
                         width: 80,
                         height: 80,
-                        errorBuilder: (context, error, _) => _buildErrorImagen(),
+                        errorBuilder: (context, error, _) => _buildErrorImagen(cs),
                         loadingBuilder: (_, child, progress) {
                           if (progress == null) return child;
-                          return const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                          return Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: cs.primary,
+                            ),
                           );
                         },
                       ),
@@ -194,13 +198,13 @@ class SolicitudMiniatura extends StatelessWidget {
                   right: 0,
                   bottom: 0,
                   child: Container(
-                    color: _colorEtiqueta.withValues(alpha: 0.85),
+                    color: colorEtiqueta.withValues(alpha: 0.85),
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Text(
                       etiqueta,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: cs.onPrimary,
                         fontSize: 9,
                         fontWeight: FontWeight.w600,
                       ),
