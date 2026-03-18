@@ -2,6 +2,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sismmun/injection.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 import 'package:sismmun/src/domain/models/ImageUploadResult.dart';
+import 'package:sismmun/src/domain/models/MultiUploadResult.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/SolicitudUseCases.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
@@ -145,5 +146,61 @@ class ImageUploaderHelper {
     } catch (e) {
       return ImageUploadResult.error(e.toString());
     }
+  }
+
+  /// Sube múltiples imágenes secuencialmente al servidor.
+  ///
+  /// Itera sobre [imagePaths] llamando a [subirImagenConMetadatos] por cada una.
+  /// Llama a [onProgreso] con (actual, total) antes de cada subida para
+  /// que el caller pueda mostrar progreso ("Subiendo 2 de 5...").
+  /// Si una imagen falla, continúa con las siguientes.
+  ///
+  /// Retorna un [MultiUploadResult] con los contadores de éxito y error.
+  Future<MultiUploadResult> subirMultiplesImagenes({
+    required List<String> imagePaths,
+    required int solicitudId,
+    required int dependenciaId,
+    required int estatusId,
+    required int servicioId,
+    required String observaciones,
+    required TipoFoto tipoFoto,
+    bool soloImagen = false,
+    Function(Imagen)? onImageUploaded,
+    Function(int actual, int total)? onProgreso,
+  }) async {
+    int exitosas = 0;
+    int errores = 0;
+    final List<String> mensajesError = [];
+
+    for (int i = 0; i < imagePaths.length; i++) {
+      // Notificar progreso antes de cada subida
+      onProgreso?.call(i + 1, imagePaths.length);
+
+      final result = await subirImagenConMetadatos(
+        imagenPath: imagePaths[i],
+        solicitudId: solicitudId,
+        dependenciaId: dependenciaId,
+        estatusId: estatusId,
+        servicioId: servicioId,
+        observaciones: observaciones,
+        tipoFoto: tipoFoto,
+        soloImagen: soloImagen,
+        onImageUploaded: onImageUploaded,
+      );
+
+      if (result != null && result.success) {
+        exitosas++;
+      } else {
+        errores++;
+        mensajesError.add(result?.message ?? 'Error desconocido');
+      }
+    }
+
+    return MultiUploadResult(
+      exitosas: exitosas,
+      errores: errores,
+      mensajesError: mensajesError,
+      total: imagePaths.length,
+    );
   }
 }

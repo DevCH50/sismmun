@@ -6,7 +6,7 @@ import 'package:sismmun/src/core/constants/app_durations.dart';
 import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
-import 'package:sismmun/src/data/api/endpoints.dart';
+import 'package:sismmun/src/data/api/Endpoints.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
@@ -52,7 +52,7 @@ class SolicitudService {
         'imagen': imagenBase64,
         'latitud': request.latitud ?? 0,
         'longitud': request.longitud ?? 0,
-        'observacion': request.observaciones ?? '',
+        'observaciones': request.observaciones ?? '',
         'tipo_foto': request.tipoFoto?.valor ?? '',
       };
 

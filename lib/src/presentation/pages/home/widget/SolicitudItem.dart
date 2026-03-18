@@ -9,6 +9,9 @@ import 'package:sismmun/src/presentation/pages/home/widget/ImageUploaderHelper.d
 import 'package:sismmun/src/presentation/pages/home/widget/ImageMetadataSheet.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/SolicitudGaleria.dart';
 import 'package:sismmun/src/presentation/widgets/ResultDialog.dart';
+import 'package:sismmun/src/domain/models/MultiUploadResult.dart';
+import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
+import 'package:sismmun/src/presentation/pages/home/widget/MultiImageMetadataSheet.dart';
 
 /// Widget que representa una tarjeta de solicitud en la lista principal.
 ///
@@ -49,10 +52,19 @@ class _SolicitudItemState extends State<SolicitudItem> {
   /// Copia local de las imágenes, se actualiza al subir nuevas fotos.
   List<Imagen?> _imagenesLocales = [];
 
+  /// Contador de imágenes tipo "Después" subidas exitosamente.
+  /// El botón verde solo se habilita cuando este contador > 0.
+  int _imagenesDespes = 0;
+
+  /// Texto de progreso durante subida múltiple (ej: "Subiendo 2 de 5...").
+  String? _textoProgreso;
+
   @override
   void initState() {
     super.initState();
     _imagenesLocales = List.from(widget.solicitud.imagenes ?? []);
+    // Nota: las imágenes ya cargadas desde el servidor no incluyen tipo_foto,
+    // por lo que _imagenesDespes parte en 0 y se actualiza solo con subidas nuevas.
   }
 
   // ---------------------------------------------------------------------------
@@ -159,37 +171,55 @@ class _SolicitudItemState extends State<SolicitudItem> {
   }
 
   /// Botón principal para marcar la solicitud como atendida.
+  ///
+  /// Se habilita únicamente cuando hay al menos una imagen tipo "Después"
+  /// subida en esta sesión, lo que garantiza evidencia fotográfica del trabajo.
   Widget _buildBotonMarcarAtendida() {
+    final puedeMarcar = !_isUploading && _imagenesDespes > 0;
+    final textoBoton = _textoProgreso ??
+        (_isUploading ? 'Subiendo imagen...' : 'Marcar como Atendida');
+
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: _isUploading
-              ? null
-              : () => _procesarImagen(marcarAtendida: true),
-          icon: _isUploading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.check_circle_outline),
-          label: Text(
-            _isUploading ? 'Subiendo imagen...' : 'Marcar como Atendida',
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green.shade600,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (_imagenesDespes == 0 && !_isUploading)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(
+                'Sube al menos una foto "Después" para habilitar este botón',
+                style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ElevatedButton.icon(
+            onPressed: puedeMarcar
+                ? () => _procesarImagen(marcarAtendida: true)
+                : null,
+            icon: _isUploading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.check_circle_outline),
+            label: Text(textoBoton),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade600,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: Colors.grey.shade300,
+              disabledForegroundColor: Colors.grey.shade500,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -198,63 +228,172 @@ class _SolicitudItemState extends State<SolicitudItem> {
   // Lógica de imagen (métodos privados)
   // ---------------------------------------------------------------------------
 
-  /// Flujo unificado para agregar imagen con o sin cambio de estatus.
+  /// Flujo unificado para agregar imagen(es) con o sin cambio de estatus.
   ///
-  /// Si [marcarAtendida] es `true` se usa `estatusId = 17` y
-  /// `soloImagen = false`; si es `false` se conserva el estatus actual.
+  /// - Cámara: selecciona una foto → metadata sheet individual → sube.
+  /// - Galería: selecciona múltiples fotos → metadata sheet compartida → sube todas.
+  ///
+  /// Si [marcarAtendida] es true se usa estatusId 17 y soloImagen=false.
   Future<void> _procesarImagen({required bool marcarAtendida}) async {
-    // Paso 1: Elegir origen (cámara o galería)
     final origen = await _seleccionarOrigenImagen();
     if (origen == null) return;
 
-    // Paso 2: Capturar / seleccionar la imagen
+    if (origen == ImageSource.camera) {
+      await _procesarImagenCamara(marcarAtendida: marcarAtendida);
+    } else {
+      await _procesarImagenesGaleria(marcarAtendida: marcarAtendida);
+    }
+  }
+
+  /// Flujo para cámara: una foto con su propio metadata sheet.
+  Future<void> _procesarImagenCamara({required bool marcarAtendida}) async {
     final picker = ImagePicker();
-    final XFile? imagenSeleccionada = await picker.pickImage(
-      source: origen,
+    final XFile? imagen = await picker.pickImage(
+      source: ImageSource.camera,
       maxWidth: 1024,
       maxHeight: 1024,
       imageQuality: 80,
     );
-    if (imagenSeleccionada == null || !mounted) return;
+    if (imagen == null || !mounted) return;
 
-    // Paso 3: Recopilar metadatos (observación y tipo de foto)
-    final metadatos = await ImageMetadataSheet.show(
-      context,
-      imagenSeleccionada.path,
-    );
+    final metadatos = await ImageMetadataSheet.show(context, imagen.path);
     if (metadatos == null || !mounted) return;
 
-    // Paso 4: Subir imagen
-    setState(() => _isUploading = true);
+    setState(() {
+      _isUploading = true;
+      _textoProgreso = null;
+    });
 
     final result = await _imageUploader.subirImagenConMetadatos(
-      imagenPath: imagenSeleccionada.path,
+      imagenPath: imagen.path,
       solicitudId: widget.solicitud.solicitudId,
       dependenciaId: widget.solicitud.dependenciaId,
       estatusId: marcarAtendida ? 17 : widget.solicitud.ultimoEstatusId,
       servicioId: widget.solicitud.servicioId,
-      observacion: metadatos.observacion,
+      observaciones: metadatos.observaciones,
       tipoFoto: metadatos.tipoFoto,
       soloImagen: !marcarAtendida,
       onImageUploaded: (imagen) {
-        setState(() => _imagenesLocales.add(imagen));
+        setState(() {
+          _imagenesLocales.add(imagen);
+          if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
+        });
       },
     );
 
     setState(() => _isUploading = false);
 
-    // Paso 5: Mostrar resultado
     if (result != null && mounted) {
       await ResultDialog.show(
         context,
         type: result.success ? ResultType.success : ResultType.error,
         message: result.message,
       );
+      if (marcarAtendida && result.success) widget.onImageUploaded?.call();
+    }
+  }
 
-      // Notificar al padre solo cuando se marcó como atendida con éxito
-      if (marcarAtendida && result.success && widget.onImageUploaded != null) {
-        widget.onImageUploaded!();
+  /// Flujo para galería: selección múltiple con metadata compartida.
+  Future<void> _procesarImagenesGaleria({required bool marcarAtendida}) async {
+    final picker = ImagePicker();
+    final List<XFile> imagenes = await picker.pickMultiImage(
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 80,
+    );
+    if (imagenes.isEmpty || !mounted) return;
+
+    final paths = imagenes.map((x) => x.path).toList();
+
+    // Si es solo una imagen, usar el sheet individual para mejor UX
+    if (paths.length == 1) {
+      final metadatos = await ImageMetadataSheet.show(context, paths.first);
+      if (metadatos == null || !mounted) return;
+
+      setState(() {
+        _isUploading = true;
+        _textoProgreso = null;
+      });
+
+      final result = await _imageUploader.subirImagenConMetadatos(
+        imagenPath: paths.first,
+        solicitudId: widget.solicitud.solicitudId,
+        dependenciaId: widget.solicitud.dependenciaId,
+        estatusId: marcarAtendida ? 17 : widget.solicitud.ultimoEstatusId,
+        servicioId: widget.solicitud.servicioId,
+        observaciones: metadatos.observaciones,
+        tipoFoto: metadatos.tipoFoto,
+        soloImagen: !marcarAtendida,
+        onImageUploaded: (img) {
+          setState(() {
+            _imagenesLocales.add(img);
+            if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
+          });
+        },
+      );
+
+      setState(() => _isUploading = false);
+
+      if (result != null && mounted) {
+        await ResultDialog.show(
+          context,
+          type: result.success ? ResultType.success : ResultType.error,
+          message: result.message,
+        );
+        if (marcarAtendida && result.success) widget.onImageUploaded?.call();
       }
+      return;
+    }
+
+    // Múltiples imágenes: usar MultiImageMetadataSheet
+    final metadatos = await MultiImageMetadataSheet.show(context, paths);
+    if (metadatos == null || !mounted) return;
+
+    setState(() {
+      _isUploading = true;
+      _textoProgreso = 'Preparando...';
+    });
+
+    final MultiUploadResult multiResult =
+        await _imageUploader.subirMultiplesImagenes(
+      imagePaths: paths,
+      solicitudId: widget.solicitud.solicitudId,
+      dependenciaId: widget.solicitud.dependenciaId,
+      estatusId: marcarAtendida ? 17 : widget.solicitud.ultimoEstatusId,
+      servicioId: widget.solicitud.servicioId,
+      observaciones: metadatos.observaciones,
+      tipoFoto: metadatos.tipoFoto,
+      soloImagen: !marcarAtendida,
+      onProgreso: (actual, total) {
+        if (mounted) {
+          setState(() => _textoProgreso = 'Subiendo $actual de $total...');
+        }
+      },
+      onImageUploaded: (img) {
+        if (mounted) {
+          setState(() {
+            _imagenesLocales.add(img);
+            if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
+          });
+        }
+      },
+    );
+
+    setState(() {
+      _isUploading = false;
+      _textoProgreso = null;
+    });
+
+    if (!mounted) return;
+
+    await ResultDialog.show(
+      context,
+      type: multiResult.todasExitosas ? ResultType.success : ResultType.error,
+      message: multiResult.mensajeResumen,
+    );
+
+    if (marcarAtendida && multiResult.algunaExitosa) {
+      widget.onImageUploaded?.call();
     }
   }
 

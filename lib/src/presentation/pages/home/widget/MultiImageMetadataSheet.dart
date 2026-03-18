@@ -3,61 +3,69 @@ import 'package:flutter/material.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
 import 'package:sismmun/src/presentation/widgets/ResultDialog.dart';
 
-/// Resultado del modal de metadatos de imagen
-class ImageMetadataResult {
+/// Resultado del modal de metadatos para múltiples imágenes.
+class MultiImageMetadataResult {
+  /// Observación compartida para todas las imágenes.
   final String observaciones;
+
+  /// Tipo de foto compartido (Antes/Después).
   final TipoFoto tipoFoto;
 
-  ImageMetadataResult({
+  /// Rutas locales de las imágenes seleccionadas.
+  final List<String> imagePaths;
+
+  const MultiImageMetadataResult({
     required this.observaciones,
     required this.tipoFoto,
+    required this.imagePaths,
   });
 }
 
-/// Bottom sheet moderno para capturar metadatos de imagen
+/// Bottom sheet para capturar metadatos de múltiples imágenes a la vez.
 ///
-/// Solicita:
-/// - Tipo de foto (Antes/Después) con SegmentedButton
-/// - Observación con TextField
+/// Muestra una fila de miniaturas de las imágenes seleccionadas,
+/// un selector de tipo (Antes/Después) y un campo de observación
+/// compartidos para todas las imágenes.
 ///
-/// Diseño UX/UI moderno siguiendo Material Design 3
-/// Responsivo para todos los tamaños de pantalla y versiones de Android/iOS
-class ImageMetadataSheet extends StatefulWidget {
-  final String imagePath;
+/// Diseño Material Design 3, compatible con tema claro/oscuro y
+/// optimizado para Android e iOS.
+class MultiImageMetadataSheet extends StatefulWidget {
+  /// Rutas locales de las imágenes seleccionadas.
+  final List<String> imagePaths;
 
-  const ImageMetadataSheet({
+  const MultiImageMetadataSheet({
     super.key,
-    required this.imagePath,
+    required this.imagePaths,
   });
 
-  /// Muestra el bottom sheet y retorna los metadatos o null si se cancela
-  static Future<ImageMetadataResult?> show(
+  /// Muestra el bottom sheet y retorna los metadatos, o null si se cancela.
+  static Future<MultiImageMetadataResult?> show(
     BuildContext context,
-    String imagePath,
+    List<String> imagePaths,
   ) {
-    return showModalBottomSheet<ImageMetadataResult>(
+    return showModalBottomSheet<MultiImageMetadataResult>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ImageMetadataSheet(imagePath: imagePath),
+      builder: (_) => MultiImageMetadataSheet(imagePaths: imagePaths),
     );
   }
 
   @override
-  State<ImageMetadataSheet> createState() => _ImageMetadataSheetState();
+  State<MultiImageMetadataSheet> createState() =>
+      _MultiImageMetadataSheetState();
 }
 
-class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
+class _MultiImageMetadataSheetState extends State<MultiImageMetadataSheet> {
   final TextEditingController _observacionController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
-  TipoFoto _tipoFotoSeleccionado = TipoFoto.antes;
+  TipoFoto _tipoFoto = TipoFoto.antes;
 
   @override
   void initState() {
     super.initState();
-    // Scroll automático al enfocar el campo de texto
     _focusNode.addListener(_onFocusChange);
   }
 
@@ -70,7 +78,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     super.dispose();
   }
 
-  /// Hace scroll hacia abajo cuando el campo de observación recibe foco
+  /// Scroll automático al enfocar el campo de observación.
   void _onFocusChange() {
     if (_focusNode.hasFocus) {
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -89,13 +97,8 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final mediaQuery = MediaQuery.of(context);
-    final bottomInset = mediaQuery.viewInsets.bottom;
-    final screenHeight = mediaQuery.size.height;
-    final isKeyboardVisible = bottomInset > 0;
-
-    // Calcular altura máxima del modal (90% de la pantalla)
-    final maxHeight = screenHeight * 0.9;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final maxHeight = MediaQuery.of(context).size.height * 0.9;
 
     return Container(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -106,10 +109,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle del bottom sheet (fijo arriba)
           _buildHandle(colorScheme),
-
-          // Contenido scrolleable
           Flexible(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -122,24 +122,15 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Título
                   _buildTitulo(theme),
+                  const SizedBox(height: 12),
+                  _buildThumbnails(colorScheme),
                   const SizedBox(height: 16),
-
-                  // Vista previa de la imagen (más pequeña si teclado visible)
-                  _buildVistaPrevia(isKeyboardVisible),
-                  const SizedBox(height: 16),
-
-                  // Selector Antes/Después
                   _buildSelectorTipoFoto(colorScheme),
                   const SizedBox(height: 16),
-
-                  // Campo de observación
                   _buildCampoObservacion(colorScheme),
                   const SizedBox(height: 20),
-
-                  // Botones de acción
-                  _buildBotonesAccion(colorScheme),
+                  _buildBotones(colorScheme),
                 ],
               ),
             ),
@@ -149,7 +140,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     );
   }
 
-  /// Handle visual del bottom sheet
+  /// Handle visual del bottom sheet.
   Widget _buildHandle(ColorScheme colorScheme) {
     return Container(
       margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -162,21 +153,73 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     );
   }
 
-  /// Título del modal
+  /// Título con contador de imágenes.
   Widget _buildTitulo(ThemeData theme) {
+    final n = widget.imagePaths.length;
     return Row(
       children: [
-        Icon(
-          Icons.add_photo_alternate_outlined,
-          color: theme.colorScheme.primary,
-          size: 24,
-        ),
+        Icon(Icons.photo_library_outlined,
+            color: theme.colorScheme.primary, size: 24),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            'Detalles de la imagen',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+            '$n ${n == 1 ? 'imagen seleccionada' : 'imágenes seleccionadas'}',
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Fila horizontal de miniaturas con índice.
+  Widget _buildThumbnails(ColorScheme colorScheme) {
+    return SizedBox(
+      height: 90,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: widget.imagePaths.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        itemBuilder: (_, i) => _buildThumbItem(colorScheme, i),
+      ),
+    );
+  }
+
+  /// Miniatura individual con número de posición.
+  Widget _buildThumbItem(ColorScheme colorScheme, int index) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.file(
+            File(widget.imagePaths[index]),
+            width: 90,
+            height: 90,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Container(
+              width: 90,
+              height: 90,
+              color: colorScheme.surfaceContainerHighest,
+              child: Icon(Icons.image_not_supported,
+                  color: colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          left: 4,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -184,53 +227,13 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     );
   }
 
-  /// Vista previa de la imagen seleccionada
-  /// Se reduce de tamaño cuando el teclado está visible
-  Widget _buildVistaPrevia(bool isKeyboardVisible) {
-    final height = isKeyboardVisible ? 100.0 : 150.0;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: height,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.file(
-        File(widget.imagePath),
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.image_not_supported,
-                    size: 40, color: Colors.grey.shade400),
-                const SizedBox(height: 4),
-                Text(
-                  'Vista previa no disponible',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  /// Selector de tipo de foto con SegmentedButton (Material 3)
+  /// Selector Antes/Después compartido para todas las imágenes.
   Widget _buildSelectorTipoFoto(ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '¿Cuándo fue tomada esta foto?',
+          '¿Cuándo fueron tomadas?',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
@@ -253,18 +256,12 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
                 icon: Icon(Icons.check_circle_outline, size: 18),
               ),
             ],
-            selected: {_tipoFotoSeleccionado},
-            onSelectionChanged: (Set<TipoFoto> selection) {
-              setState(() {
-                _tipoFotoSeleccionado = selection.first;
-              });
-            },
+            selected: {_tipoFoto},
+            onSelectionChanged: (s) => setState(() => _tipoFoto = s.first),
             style: ButtonStyle(
               visualDensity: VisualDensity.compact,
               shape: WidgetStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ),
@@ -273,13 +270,13 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     );
   }
 
-  /// Campo de texto para la observación
+  /// Campo de observación compartido para todas las imágenes.
   Widget _buildCampoObservacion(ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Observaciónes *',
+          'Observación *',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
@@ -297,7 +294,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _confirmar(),
           decoration: InputDecoration(
-            hintText: 'Describe lo que muestra la imagen...',
+            hintText: 'Describe lo que muestran las imágenes...',
             hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
             filled: true,
             fillColor: colorScheme.surfaceContainerHighest.withAlpha(128),
@@ -307,22 +304,17 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: colorScheme.outline.withAlpha(77),
-              ),
+              borderSide:
+                  BorderSide(color: colorScheme.outline.withAlpha(77)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(
-                color: colorScheme.primary,
-                width: 2,
-              ),
+              borderSide:
+                  BorderSide(color: colorScheme.primary, width: 2),
             ),
             contentPadding: const EdgeInsets.all(12),
             counterStyle: TextStyle(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: 11,
-            ),
+                color: colorScheme.onSurfaceVariant, fontSize: 11),
             isDense: true,
           ),
           style: const TextStyle(fontSize: 14),
@@ -331,39 +323,36 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     );
   }
 
-  /// Botones de acción (Cancelar y Subir)
-  Widget _buildBotonesAccion(ColorScheme colorScheme) {
+  /// Botones Cancelar y Subir.
+  Widget _buildBotones(ColorScheme colorScheme) {
+    final n = widget.imagePaths.length;
     return SafeArea(
       top: false,
       child: Row(
         children: [
-          // Botón Cancelar
           Expanded(
             child: OutlinedButton(
               onPressed: () => Navigator.pop(context),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                    borderRadius: BorderRadius.circular(10)),
                 side: BorderSide(color: colorScheme.outline),
               ),
               child: const Text('Cancelar'),
             ),
           ),
           const SizedBox(width: 12),
-          // Botón Subir
           Expanded(
             flex: 2,
             child: FilledButton.icon(
               onPressed: _confirmar,
               icon: const Icon(Icons.cloud_upload_outlined, size: 18),
-              label: const Text('Subir'),
+              label: Text('Subir $n ${n == 1 ? 'imagen' : 'imágenes'}'),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                    borderRadius: BorderRadius.circular(10)),
               ),
             ),
           ),
@@ -372,11 +361,9 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
     );
   }
 
-  /// Confirma y retorna los metadatos
+  /// Valida y retorna los metadatos al caller.
   void _confirmar() async {
     final observaciones = _observacionController.text.trim();
-
-    // Validar que haya observación
     if (observaciones.isEmpty) {
       await ResultDialog.warning(
         context,
@@ -385,12 +372,13 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
       _focusNode.requestFocus();
       return;
     }
-
+    if (!mounted) return;
     Navigator.pop(
       context,
-      ImageMetadataResult(
+      MultiImageMetadataResult(
         observaciones: observaciones,
-        tipoFoto: _tipoFotoSeleccionado,
+        tipoFoto: _tipoFoto,
+        imagePaths: widget.imagePaths,
       ),
     );
   }

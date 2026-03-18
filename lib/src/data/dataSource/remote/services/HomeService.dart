@@ -5,7 +5,7 @@ import 'package:sismmun/src/core/constants/app_durations.dart';
 import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
-import 'package:sismmun/src/data/api/endpoints.dart';
+import 'package:sismmun/src/data/api/Endpoints.dart';
 import 'package:sismmun/src/data/dataSource/local/SharedPref.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
 import 'package:sismmun/src/domain/models/SolicitudesResponse.dart';
