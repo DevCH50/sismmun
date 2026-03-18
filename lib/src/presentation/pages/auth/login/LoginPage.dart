@@ -46,28 +46,24 @@ class _LoginPageState extends State<LoginPage> {
     if (keyboardHeight > 0) _scrollAlFinal();
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      // false: el Stack no encoge → fondo siempre llena la pantalla completa
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Fondo extendido para cubrir también detrás del teclado
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: -keyboardHeight,
-            child: const LoginBackGround(),
-          ),
+          // Fondo ocupa toda la pantalla sin importar el teclado
+          const Positioned.fill(child: LoginBackGround()),
 
           // Listener de respuesta (no visual)
           LoginResponse(bloc),
 
-          // Scroll controlado: al aparecer el teclado lleva el botón a la vista
+          // padding bottom = keyboardHeight crea espacio virtual para scrollear
+          // _scrollAlFinal() desplaza hasta ese espacio mostrando el botón
           SafeArea(
             child: SingleChildScrollView(
               controller: _scrollController,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.symmetric(vertical: 24),
+              padding: EdgeInsets.only(top: 24, bottom: 24 + keyboardHeight),
               child: Center(child: LoginContent(bloc)),
             ),
           ),
