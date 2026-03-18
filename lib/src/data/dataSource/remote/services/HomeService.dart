@@ -53,6 +53,7 @@ class HomeService {
 
       final Map<String, String> headers = {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       };
       final String bodyParams = json.encode({'user_id': userId});

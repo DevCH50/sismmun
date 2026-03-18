@@ -26,7 +26,10 @@ class AuthService {
     AppLogger.httpRequest('POST', url.toString());
 
     try {
-      final Map<String, String> headers = {'Content-Type': 'application/json'};
+      final Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
       final String bodyParams = json.encode({
         'username': username,
         'password': password,
