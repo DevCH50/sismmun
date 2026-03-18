@@ -4,7 +4,6 @@ import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginState.dart';
 import 'package:sismmun/src/presentation/utils/BlocForItem.dart';
 import 'package:sismmun/src/presentation/widgets/DefaultTextField.dart';
 import 'package:sismmun/src/presentation/widgets/LogoRedondeUno.dart';
-import 'package:sismmun/src/presentation/widgets/NoTienesCuentaAun.dart';
 import 'package:sismmun/src/presentation/widgets/PrimaryElevatedButton.dart';
 import 'package:sismmun/src/presentation/widgets/ResultDialog.dart';
 import 'package:flutter/material.dart';
@@ -97,24 +96,6 @@ class LoginContent extends StatelessWidget {
                       },
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () {
-                      // Handle forgot password action
-                    },
-                    child: const Text(
-                      '¿Olvidaste tu contraseña?',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const NoTienesCuentaAun(
-                    color: Color.fromARGB(111, 65, 34, 5),
-                    mensaje:
-                        'Ponte en contacto con tu Coordinador(a) para que te proporcionen tu cuenta.',
-                    titulo: '¿No tienes una cuenta?',
-                    icono: Icons.work_off,
                   ),
                 ],
             ),
