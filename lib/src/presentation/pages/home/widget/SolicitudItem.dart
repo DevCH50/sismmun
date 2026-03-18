@@ -78,6 +78,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -86,11 +87,11 @@ class _SolicitudItemState extends State<SolicitudItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSolicitudId(),
+            _buildSolicitudId(cs),
             const SizedBox(height: 4),
             _buildTitulo(),
             const SizedBox(height: 4),
-            _buildServicio(),
+            _buildServicio(cs),
             if (_imagenesLocales.isNotEmpty)
               SolicitudGaleria(
                 imagenes: _imagenesLocales,
@@ -98,8 +99,8 @@ class _SolicitudItemState extends State<SolicitudItem> {
                 onAgregarImagen: () => _procesarImagen(marcarAtendida: false),
                 onVerImagen: _mostrarImagenCompleta,
               ),
-            if (_imagenesLocales.isEmpty) _buildBotonAgregarImagen(),
-            _buildBotonMarcarAtendida(),
+            if (_imagenesLocales.isEmpty) _buildBotonAgregarImagen(cs),
+            _buildBotonMarcarAtendida(cs),
           ],
         ),
       ),
@@ -111,7 +112,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
   // ---------------------------------------------------------------------------
 
   /// Fila con fecha de ingreso (izquierda) e ID de solicitud (derecha).
-  Widget _buildSolicitudId() {
+  Widget _buildSolicitudId(ColorScheme cs) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -120,7 +121,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 12,
-            color: Colors.grey.shade700,
+            color: cs.onSurfaceVariant,
           ),
         ),
         Text(
@@ -128,7 +129,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 12,
-            color: Colors.grey.shade700,
+            color: cs.onSurfaceVariant,
           ),
         ),
       ],
@@ -150,15 +151,15 @@ class _SolicitudItemState extends State<SolicitudItem> {
   }
 
   /// Nombre del servicio asociado a la solicitud.
-  Widget _buildServicio() {
+  Widget _buildServicio(ColorScheme cs) {
     return Text(
       widget.solicitud.servicio,
-      style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+      style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
     );
   }
 
   /// Botón que aparece solo cuando la solicitud no tiene imágenes aún.
-  Widget _buildBotonAgregarImagen() {
+  Widget _buildBotonAgregarImagen(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: TextButton.icon(
@@ -169,7 +170,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
         label: const Text('+ Imagen'),
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          foregroundColor: Colors.blue.shade700,
+          foregroundColor: cs.primary,
         ),
       ),
     );
@@ -179,7 +180,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
   ///
   /// Se habilita únicamente cuando hay al menos una imagen tipo "Después"
   /// subida en esta sesión, lo que garantiza evidencia fotográfica del trabajo.
-  Widget _buildBotonMarcarAtendida() {
+  Widget _buildBotonMarcarAtendida(ColorScheme cs) {
     final puedeMarcar = !_isUploading && _imagenesDespes > 0;
     final textoBoton = _textoProgreso ??
         (_isUploading ? 'Subiendo imagen...' : 'Marcar como Atendida');
@@ -194,7 +195,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
               padding: const EdgeInsets.only(bottom: 6),
               child: Text(
                 'Sube al menos una foto "Después" para habilitar este botón',
-                style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
+                style: TextStyle(fontSize: 11, color: cs.tertiary),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -203,21 +204,21 @@ class _SolicitudItemState extends State<SolicitudItem> {
                 ? () => _procesarImagen(marcarAtendida: true)
                 : null,
             icon: _isUploading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: cs.onPrimary,
                     ),
                   )
                 : const Icon(Icons.check_circle_outline),
             label: Text(textoBoton),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green.shade600,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: Colors.grey.shade300,
-              disabledForegroundColor: Colors.grey.shade500,
+              backgroundColor: cs.primary,
+              foregroundColor: cs.onPrimary,
+              disabledBackgroundColor: cs.surfaceContainerHighest,
+              disabledForegroundColor: cs.onSurfaceVariant,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),

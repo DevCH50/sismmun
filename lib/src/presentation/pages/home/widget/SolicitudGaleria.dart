@@ -39,19 +39,19 @@ class SolicitudGaleria extends StatelessWidget {
   // ---------------------------------------------------------------------------
 
   /// Etiqueta que muestra la cantidad de imágenes con ícono de biblioteca.
-  Widget _buildEtiquetaImagenes() {
+  Widget _buildEtiquetaImagenes(ColorScheme cs) {
     final int cantidad = imagenes.length;
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          Icon(Icons.photo_library, size: 14, color: Colors.grey.shade600),
+          Icon(Icons.photo_library, size: 14, color: cs.onSurfaceVariant),
           const SizedBox(width: 4),
           Text(
             '$cantidad ${cantidad == 1 ? 'imagen' : 'imágenes'}',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -61,14 +61,14 @@ class SolicitudGaleria extends StatelessWidget {
   }
 
   /// Botón compacto para agregar una imagen adicional.
-  Widget _buildBotonAgregar() {
+  Widget _buildBotonAgregar(ColorScheme cs) {
     return TextButton.icon(
       onPressed: isUploading ? null : onAgregarImagen,
       icon: const Icon(Icons.add_photo_alternate, size: 16),
       label: const Text('+ Imagen'),
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 8),
-        foregroundColor: Colors.blue.shade700,
+        foregroundColor: cs.primary,
       ),
     );
   }
@@ -79,6 +79,7 @@ class SolicitudGaleria extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Column(
@@ -88,8 +89,8 @@ class SolicitudGaleria extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildEtiquetaImagenes(),
-              _buildBotonAgregar(),
+              _buildEtiquetaImagenes(cs),
+              _buildBotonAgregar(cs),
             ],
           ),
 

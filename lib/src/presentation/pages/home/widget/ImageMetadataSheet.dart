@@ -127,7 +127,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
                   const SizedBox(height: 16),
 
                   // Vista previa de la imagen (más pequeña si teclado visible)
-                  _buildVistaPrevia(isKeyboardVisible),
+                  _buildVistaPrevia(isKeyboardVisible, colorScheme),
                   const SizedBox(height: 16),
 
                   // Selector Antes/Después
@@ -186,7 +186,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
 
   /// Vista previa de la imagen seleccionada
   /// Se reduce de tamaño cuando el teclado está visible
-  Widget _buildVistaPrevia(bool isKeyboardVisible) {
+  Widget _buildVistaPrevia(bool isKeyboardVisible, ColorScheme cs) {
     final height = isKeyboardVisible ? 100.0 : 150.0;
 
     return AnimatedContainer(
@@ -194,7 +194,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
       height: height,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color: cs.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
       clipBehavior: Clip.antiAlias,
@@ -207,12 +207,12 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.image_not_supported,
-                    size: 40, color: Colors.grey.shade400),
+                    size: 40, color: cs.onSurfaceVariant),
                 const SizedBox(height: 4),
                 Text(
                   'Vista previa no disponible',
                   style: TextStyle(
-                    color: Colors.grey.shade600,
+                    color: cs.onSurfaceVariant,
                     fontSize: 12,
                   ),
                 ),
@@ -279,7 +279,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Observaciónes *',
+          'Observaciones *',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
@@ -298,7 +298,7 @@ class _ImageMetadataSheetState extends State<ImageMetadataSheet> {
           onSubmitted: (_) => _confirmar(),
           decoration: InputDecoration(
             hintText: 'Describe lo que muestra la imagen...',
-            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
             filled: true,
             fillColor: colorScheme.surfaceContainerHighest.withAlpha(128),
             border: OutlineInputBorder(

@@ -211,13 +211,13 @@ class _MultiImageMetadataSheetState extends State<MultiImageMetadataSheet> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.black54,
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
               '${index + 1}',
-              style: const TextStyle(
-                  color: Colors.white,
+              style: TextStyle(
+                  color: colorScheme.surface,
                   fontSize: 11,
                   fontWeight: FontWeight.bold),
             ),
@@ -295,7 +295,7 @@ class _MultiImageMetadataSheetState extends State<MultiImageMetadataSheet> {
           onSubmitted: (_) => _confirmar(),
           decoration: InputDecoration(
             hintText: 'Describe lo que muestran las imágenes...',
-            hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+            hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
             filled: true,
             fillColor: colorScheme.surfaceContainerHighest.withAlpha(128),
             border: OutlineInputBorder(
