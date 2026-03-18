@@ -63,8 +63,13 @@ class _SolicitudItemState extends State<SolicitudItem> {
   void initState() {
     super.initState();
     _imagenesLocales = List.from(widget.solicitud.imagenes ?? []);
-    // Nota: las imágenes ya cargadas desde el servidor no incluyen tipo_foto,
-    // por lo que _imagenesDespes parte en 0 y se actualiza solo con subidas nuevas.
+    // Contar imágenes tipo "después" ya presentes al cargar la solicitud.
+    _imagenesDespes = _imagenesLocales
+        .where((img) {
+          final tipo = img?.tipoFoto.trim().toLowerCase() ?? '';
+          return tipo == 'despues' || tipo == 'después';
+        })
+        .length;
   }
 
   // ---------------------------------------------------------------------------
