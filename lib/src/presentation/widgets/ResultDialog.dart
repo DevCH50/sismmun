@@ -210,13 +210,20 @@ class ResultDialog extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          // Mensaje
-          Text(
-            message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+          // Mensaje (scrolleable si es muy largo)
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.3,
             ),
-            textAlign: TextAlign.center,
+            child: SingleChildScrollView(
+              child: Text(
+                message,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
           const SizedBox(height: 24),
 
