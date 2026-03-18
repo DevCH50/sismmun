@@ -87,8 +87,8 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 - Si tienes que crear un nuevo archivo, asegurate de que este bien comentado y estructurado
 - No Toast, utiliza ResultDialog para mostrar mensajes de error o éxito
 - Siempre sube los cambios a github remoto con el arhivo mygit_1.sh
-- Asuegurate de que todos los modulos tengan su test y que todos pasen satisfactoriamente.
-- Asegurate de de seguir al pie de la letra las reglas de este .md
+- Asegurate de que todos los modulos tengan su test y que todos pasen satisfactoriamente.
+- Asegurate de seguir al pie de la letra las reglas de este .md
 - Para tareas especifica, usa subagentes que te ayuden a resolver mas rápido.
 - Usar siempre `Endpoints` para los paths del API (no strings hardcodeados)
 - Usar siempre `AppStrings` para los textos de error y UI

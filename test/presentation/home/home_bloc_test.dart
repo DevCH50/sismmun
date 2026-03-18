@@ -260,7 +260,7 @@ void main() {
       estatusId: 17,
       servicioId: 5,
       imagenPath: '/tmp/test.jpg',
-      observacion: 'Foto de prueba',
+      observaciones: 'Foto de prueba',
       tipoFoto: TipoFoto.despues,
     );
 
