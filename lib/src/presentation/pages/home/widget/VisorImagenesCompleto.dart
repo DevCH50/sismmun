@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:sismmun/src/data/api/ApiConfig.dart';
+
 /// Widget especializado para visualizar imágenes en pantalla completa
 /// con navegación entre múltiples imágenes
 class VisorImagenesCompleto extends StatefulWidget {
@@ -80,7 +82,7 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
             minScale: 0.5,
             maxScale: 4.0,
             child: Image.network(
-              imagen?.urlImagen ?? '',
+              ApiConfig.fixImageUrl(imagen?.urlImagen ?? ''),
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 return Container(

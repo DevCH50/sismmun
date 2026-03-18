@@ -61,4 +61,18 @@ class ApiConfig {
       return Uri.http(baseUrl, path, queryParameters);
     }
   }
+
+  /// Corrige URLs de imágenes devueltas por el backend.
+  ///
+  /// En desarrollo, el backend devuelve URLs con "localhost" que el dispositivo
+  /// físico no puede resolver. Este método reemplaza "localhost" por la IP real
+  /// del servidor para que las imágenes carguen correctamente.
+  ///
+  /// En producción la URL se devuelve sin cambios.
+  static String fixImageUrl(String url) {
+    if (isProduction) return url;
+    return url
+        .replaceFirst('http://localhost', 'http://$baseUrl')
+        .replaceFirst('https://localhost', 'http://$baseUrl');
+  }
 }

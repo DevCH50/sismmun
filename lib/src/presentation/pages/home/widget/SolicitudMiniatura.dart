@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:sismmun/src/data/api/ApiConfig.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 
 /// Widget que muestra una miniatura de imagen o ícono PDF.
@@ -149,7 +150,7 @@ class SolicitudMiniatura extends StatelessWidget {
           child: esPdf
               ? _buildPdfIcon()
               : Image.network(
-                  imagen.urlThumb,
+                  ApiConfig.fixImageUrl(imagen.urlThumb),
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => _buildErrorImagen(),
                   loadingBuilder: (_, child, progress) {
