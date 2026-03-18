@@ -24,30 +24,29 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     bloc = BlocProvider.of<LoginBloc>(context);
 
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      // false: el Stack no encoge, el fondo siempre llena la pantalla
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           // Fondo siempre cubre toda la pantalla
           const Positioned.fill(child: LoginBackGround()),
 
-          // Listener de respuesta (no visual, solo reacciona a eventos del BLoC)
+          // Listener de respuesta (no visual)
           LoginResponse(bloc),
 
-          // Formulario scrolleable — sube cuando aparece el teclado
-          SafeArea(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height -
-                      MediaQuery.of(context).padding.top -
-                      MediaQuery.of(context).padding.bottom,
-                ),
-                child: Center(
-                  child: LoginContent(bloc),
-                ),
+          // Formulario: padding bottom = altura del teclado → el contenido sube
+          SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.only(bottom: keyboardHeight),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: screenHeight),
+              child: SafeArea(
+                child: Center(child: LoginContent(bloc)),
               ),
             ),
           ),
