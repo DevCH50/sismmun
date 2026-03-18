@@ -45,30 +45,32 @@ class _LoginPageState extends State<LoginPage> {
     // Cada vez que el teclado aparece, desplaza hasta el final del scroll
     if (keyboardHeight > 0) _scrollAlFinal();
 
-    return Scaffold(
-      // false: el Stack no encoge → fondo siempre llena la pantalla completa
-      resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          // Fondo ocupa toda la pantalla sin importar el teclado
-          const Positioned.fill(child: LoginBackGround()),
-
-          // Listener de respuesta (no visual)
-          LoginResponse(bloc),
-
-          // padding bottom = keyboardHeight crea espacio virtual para scrollear
-          // _scrollAlFinal() desplaza hasta ese espacio mostrando el botón
-          SafeArea(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: EdgeInsets.only(top: 24, bottom: 24 + keyboardHeight),
-              child: Center(child: LoginContent(bloc)),
-            ),
+    // El fondo vive FUERA del Scaffold → nunca se recorta con el teclado.
+    // El Scaffold (resizeToAvoidBottomInset: true) encoge su body cuando
+    // aparece el teclado y Flutter hace scroll automático al campo activo.
+    // _scrollAlFinal() garantiza que el botón debajo del campo también sea visible.
+    return Stack(
+      children: [
+        const Positioned.fill(child: LoginBackGround()),
+        Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Colors.transparent,
+          body: Stack(
+            children: [
+              LoginResponse(bloc),
+              SafeArea(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(child: LoginContent(bloc)),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
