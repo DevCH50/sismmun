@@ -4,4 +4,12 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Permite tráfico HTTP (no cifrado) en modo debug para conectar
+         con el servidor local de desarrollo (Vagrant/ServiMun).
+         Este atributo solo aplica en debug y NO se incluye en release. -->
+    <application
+        android:usesCleartextTraffic="true"
+        tools:ignore="UnusedAttribute"
+        xmlns:tools="http://schemas.android.com/tools"/>
 </manifest>

@@ -10,7 +10,7 @@
 class ApiConfig {
   /// Bandera para seleccionar entre producción y desarrollo local.
   /// Cambia a [false] para usar servidor local en desarrollo.
-  static const bool isProduction = true;
+  static const bool isProduction = false;
 
   // ---------------------------------------------------------------------------
   // CONFIGURACIÓN LOCAL (solo se usa cuando isProduction = false)
@@ -19,9 +19,9 @@ class ApiConfig {
   /// IP del emulador Android (apunta al localhost de la PC host)
   static const String emulatorUrl = '10.0.2.2:8000';
 
-  /// IP de la PC en la red local (para dispositivo físico).
-  /// Ejecuta: hostname -I | awk '{print $1}' para obtener la IP actual.
-  static const String physicalDeviceUrl = '192.168.1.73:8000';
+  /// IP del servidor ServiMun en Vagrant (red host-only).
+  /// Ver CLAUDE.md del backend: /home/carlos/Projects/Laravel/ServiMun
+  static const String physicalDeviceUrl = '192.168.90.10:8000';
 
   /// Indica si se prueba en dispositivo físico (true) o emulador (false).
   static const bool isPhysicalDevice = true;
