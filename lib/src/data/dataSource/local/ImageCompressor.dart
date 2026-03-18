@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:sismmun/src/core/utils/app_logger.dart';
 
 /// Utilidad para comprimir imágenes
 class ImageCompressor {
@@ -18,7 +19,11 @@ class ImageCompressor {
     int minHeight = 800,
   }) async {
     try {
-      final rutaDestino = archivo.path.replaceAll('.jpg', '_compressed.jpg');
+      // Genera ruta destino compatible con cualquier extensión de imagen
+      final rutaDestino = archivo.path.replaceAll(
+        RegExp(r'\.(jpg|jpeg|png|webp)$', caseSensitive: false),
+        '_compressed.jpg',
+      );
 
       final resultado = await FlutterImageCompress.compressAndGetFile(
         archivo.absolute.path,
@@ -30,7 +35,7 @@ class ImageCompressor {
 
       return resultado != null ? File(resultado.path) : archivo;
     } catch (e) {
-      print('❌ Error al comprimir imagen: $e');
+      AppLogger.error('Error al comprimir imagen: $e', tag: 'ImageCompressor');
       // Si falla la compresión, devolver la imagen original
       return archivo;
     }

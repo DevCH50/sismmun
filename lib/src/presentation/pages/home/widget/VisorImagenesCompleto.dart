@@ -49,16 +49,16 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
           _buildPageView(),
 
           // Botón para cerrar (esquina superior derecha)
-          _buildBotonCerrar(),
+          _buildBotonCerrar(context),
 
           // Indicador de posición (esquina superior izquierda)
-          if (widget.imagenes.length > 1) _buildIndicadorPosicion(),
+          if (widget.imagenes.length > 1) _buildIndicadorPosicion(context),
 
           // Botones de navegación (izquierda y derecha)
           if (widget.imagenes.length > 1) ..._buildBotonesNavegacion(),
 
           // Información de la fecha (parte inferior)
-          _buildInfoFecha(),
+          _buildInfoFecha(context),
         ],
       ),
     );
@@ -124,10 +124,11 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
     );
   }
 
-  /// Construye el botón de cerrar
-  Widget _buildBotonCerrar() {
+  /// Construye el botón de cerrar (respeta SafeArea / notch en iOS)
+  Widget _buildBotonCerrar(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Positioned(
-      top: 16,
+      top: topPadding + 8,
       right: 16,
       child: IconButton(
         icon: const Icon(Icons.close, color: Colors.white, size: 30),
@@ -140,10 +141,11 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
     );
   }
 
-  /// Construye el indicador de posición
-  Widget _buildIndicadorPosicion() {
+  /// Construye el indicador de posición (respeta SafeArea / notch en iOS)
+  Widget _buildIndicadorPosicion(BuildContext context) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Positioned(
-      top: 16,
+      top: topPadding + 8,
       left: 16,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -214,10 +216,11 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
     ];
   }
 
-  /// Construye la información de fecha
-  Widget _buildInfoFecha() {
+  /// Construye la información de fecha (respeta home indicator en iOS)
+  Widget _buildInfoFecha(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return Positioned(
-      bottom: 16,
+      bottom: bottomPadding + 16,
       left: 0,
       right: 0,
       child: Center(

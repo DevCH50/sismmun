@@ -10,7 +10,7 @@
 class ApiConfig {
   /// Bandera para seleccionar entre producción y desarrollo local.
   /// Cambia a [false] para usar servidor local en desarrollo.
-  static const bool isProduction = false;
+  static const bool isProduction = true;
 
   // ---------------------------------------------------------------------------
   // CONFIGURACIÓN LOCAL (solo se usa cuando isProduction = false)

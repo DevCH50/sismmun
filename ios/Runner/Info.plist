@@ -69,13 +69,30 @@
 		<!-- Indica que la app no usa encriptación exenta (requerido para App Store) -->
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
-		<!-- Permite conexiones HTTP (además de HTTPS) si es necesario -->
+		<!-- Seguridad de red: HTTPS en producción, HTTP permitido para IPs de desarrollo -->
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSAllowsArbitraryLoads</key>
 			<false/>
-			<key>NSAllowsArbitraryLoadsInWebContent</key>
-			<false/>
+			<!-- Excepción para servidor local de desarrollo (dispositivo físico en WiFi) -->
+			<key>NSExceptionDomains</key>
+			<dict>
+				<key>192.168.1.85</key>
+				<dict>
+					<key>NSIncludesSubdomains</key>
+					<false/>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+				</dict>
+				<!-- Emulador iOS apunta a localhost directamente -->
+				<key>localhost</key>
+				<dict>
+					<key>NSIncludesSubdomains</key>
+					<false/>
+					<key>NSExceptionAllowsInsecureHTTPLoads</key>
+					<true/>
+				</dict>
+			</dict>
 		</dict>
 	</dict>
 </plist>

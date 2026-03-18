@@ -75,7 +75,6 @@ class UserAvatar extends StatelessWidget {
         ),
         // Si hay error
         errorWidget: (context, url, error) {
-          print('Error cargando imagen: $url - $error');
           return _buildInitial(textColor);
         },
       ),
