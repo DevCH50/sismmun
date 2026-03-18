@@ -95,7 +95,7 @@ class LoginContent extends StatelessWidget {
                           );
                         }
                       },
-                      color: const Color.fromARGB(255, 181, 211, 5),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   const SizedBox(height: 10),
