@@ -48,67 +48,48 @@ class RegisterPage extends StatelessWidget {
                     DefaultTextField(
                       label: 'Nombre',
                       icon: Icons.person,
-                      onChanged: (text) {
-                        print('Nombre: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     DefaultTextField(
                       label: 'Apellido Paterno',
                       icon: Icons.person,
-                      onChanged: (text) {
-                        print('Apellido Paterno: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     DefaultTextField(
                       label: 'Apellido Materno',
                       icon: Icons.person,
-                      onChanged: (text) {
-                        print('Apellido Materno: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     DefaultTextField(
                       label: 'Celular',
                       icon: Icons.phone,
                       keyboardType: TextInputType.phone,
-                      onChanged: (text) {
-                        print('Celular: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     DefaultTextField(
                       label: 'Email',
                       icon: Icons.email,
                       keyboardType: TextInputType.emailAddress,
-                      onChanged: (text) {
-                        print('Email: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     DefaultTextField(
                       label: 'Contraseña',
                       icon: Icons.lock,
                       obscureText: true,
-                      onChanged: (text) {
-                        print('Password: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     DefaultTextField(
                       label: 'Confirmar Contraseña',
                       icon: Icons.lock_outline,
                       obscureText: true,
-                      onChanged: (text) {
-                        print('Confirm Password: $text');
-                      },
+                      onChanged: (_) {},
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
-                      width: MediaQuery.of(
-                        context,
-                      ).size.width, // Make button full width
+                      width: MediaQuery.of(context).size.width,
                       child: PrimaryElevatedButton(
                         text: 'Guardar',
-                        onPressed: () {
-                          // Handle registration action
-                          print('Register button pressed');
-                        },
+                        onPressed: () {},
                       ),
                     ),
                   ],

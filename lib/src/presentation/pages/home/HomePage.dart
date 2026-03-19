@@ -123,20 +123,25 @@ class _HomesPageState extends State<HomesPage> {
             ),
           ],
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(255, 74, 144, 226),
-                Color.fromARGB(255, 163, 206, 241),
-              ],
-            ),
-          ),
-          child: BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) => _buildBody(context, state),
-          ),
+        body: Builder(
+          builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    cs.primaryContainer.withValues(alpha: 0.35),
+                    cs.surface,
+                  ],
+                ),
+              ),
+              child: BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) => _buildBody(context, state),
+              ),
+            );
+          },
         ),
       ),
     );

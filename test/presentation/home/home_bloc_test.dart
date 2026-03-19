@@ -16,6 +16,7 @@ import 'package:sismmun/src/domain/useCases/auth/LogoutUseCase.dart';
 import 'package:sismmun/src/domain/useCases/auth/SaveUserSessionUseCase.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/GetSolicitudesUseCase.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/HomeUseCases.dart';
+import 'package:sismmun/src/domain/useCases/solicitudes/EliminarImagenUseCase.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/SolicitudUseCases.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/SubirImagenUseCase.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart' as res;
@@ -26,6 +27,7 @@ import 'package:sismmun/src/presentation/pages/home/bloc/HomeState.dart';
 // Mocks
 class MockGetSolicitudesUseCase extends Mock implements GetSolicitudesUseCase {}
 class MockSubirImagenUseCase extends Mock implements SubirImagenUseCase {}
+class MockEliminarImagenUseCase extends Mock implements EliminarImagenUseCase {}
 class MockLoginUseCase extends Mock implements LoginUseCase {}
 class MockSaveUserSessionUseCase extends Mock implements SaveUserSessionUseCase {}
 class MockGetUserSessionUseCase extends Mock implements GetUserSessionUseCase {}
@@ -93,6 +95,7 @@ AuthResponse _buildAuthResponse() => AuthResponse(
 void main() {
   late MockGetSolicitudesUseCase mockGetSolicitudes;
   late MockSubirImagenUseCase mockSubirImagen;
+  late MockEliminarImagenUseCase mockEliminarImagen;
   late MockLoginUseCase mockLogin;
   late MockSaveUserSessionUseCase mockSave;
   late MockGetUserSessionUseCase mockGetSession;
@@ -105,6 +108,7 @@ void main() {
   setUp(() {
     mockGetSolicitudes = MockGetSolicitudesUseCase();
     mockSubirImagen = MockSubirImagenUseCase();
+    mockEliminarImagen = MockEliminarImagenUseCase();
     mockLogin = MockLoginUseCase();
     mockSave = MockSaveUserSessionUseCase();
     mockGetSession = MockGetUserSessionUseCase();
@@ -119,7 +123,10 @@ void main() {
       getUserSession: mockGetSession,
       logout: mockLogout,
     ),
-    SolicitudUseCases(subirImagen: mockSubirImagen),
+    SolicitudUseCases(
+      subirImagen: mockSubirImagen,
+      eliminarImagen: mockEliminarImagen,
+    ),
   );
 
   group('HomeBloc - GetHomesList', () {
@@ -262,6 +269,7 @@ void main() {
       imagenPath: '/tmp/test.jpg',
       observaciones: 'Foto de prueba',
       tipoFoto: TipoFoto.despues,
+      userId: 1,
     );
 
     blocTest<HomeBloc, HomeState>(

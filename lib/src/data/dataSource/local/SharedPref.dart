@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sismmun/src/core/utils/app_logger.dart';
 
 class SharedPref {
   // Guardar cualquier tipo de dato
@@ -51,7 +52,7 @@ class SharedPref {
     try {
       return Map<String, dynamic>.from(jsonDecode(value));
     } catch (e) {
-      print('Error al parsear JSON: $e');
+      AppLogger.error('Error al parsear JSON: $e', tag: 'SharedPref');
       return null;
     }
   }

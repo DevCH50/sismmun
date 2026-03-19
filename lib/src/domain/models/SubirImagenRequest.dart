@@ -37,6 +37,7 @@ class SubirImagenRequest {
   final bool soloImagen;
   final String? observaciones; // Observación de la imagen
   final TipoFoto? tipoFoto; // Antes o Después
+  final int userId;
 
   SubirImagenRequest({
     required this.solicitudId,
@@ -49,6 +50,7 @@ class SubirImagenRequest {
     this.soloImagen = false,
     this.observaciones,
     this.tipoFoto,
+    required this.userId,
   });
 
   Map<String, String> toMap() {
@@ -63,6 +65,7 @@ class SubirImagenRequest {
       'solo_imagen': soloImagen ? '1' : '0',
       'observaciones': observaciones ?? '',
       'tipo_foto': tipoFoto?.valor ?? '',
+      'user_id': userId.toString(),
     };
   }
 }

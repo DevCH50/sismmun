@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sismmun/src/core/theme/material_theme.dart';
+import 'package:sismmun/src/core/theme/theme.dart';
 
 /// Tema centralizado de la aplicación SisMMun.
 ///

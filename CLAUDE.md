@@ -95,6 +95,7 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 - Usar siempre `AppDurations` para timeouts y duraciones
 - Usar siempre `AppLogger` en lugar de `print` o `kDebugMode print`
 - Nunca usar colores hardcodeados (`Colors.red`, `Colors.green`, `Colors.grey`, etc.). Usar siempre `Theme.of(context).colorScheme` para todos los colores de la UI
+- Cuando el usuario tenga que interacturar con algun método o evento, que pregunte si desea hacer x cosas, con la opcion No o Cancelar como predeterminada.
 
 ---
 

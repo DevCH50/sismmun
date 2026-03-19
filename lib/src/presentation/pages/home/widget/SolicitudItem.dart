@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/src/domain/models/Solicitud.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 import 'package:sismmun/src/presentation/pages/home/bloc/HomeBloc.dart';
@@ -8,6 +11,7 @@ import 'package:sismmun/src/presentation/pages/home/widget/VisorImagenesCompleto
 import 'package:sismmun/src/presentation/pages/home/widget/ImageUploaderHelper.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/ImageMetadataSheet.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/SolicitudGaleria.dart';
+import 'package:sismmun/src/domain/utils/Resource.dart' as res;
 import 'package:sismmun/src/presentation/widgets/ResultDialog.dart';
 import 'package:sismmun/src/domain/models/MultiUploadResult.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
@@ -98,6 +102,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
                 isUploading: _isUploading,
                 onAgregarImagen: () => _procesarImagen(marcarAtendida: false),
                 onVerImagen: _mostrarImagenCompleta,
+                onEliminarImagen: _eliminarImagen,
               ),
             if (_imagenesLocales.isEmpty) _buildBotonAgregarImagen(cs),
             _buildBotonMarcarAtendida(cs),
@@ -167,7 +172,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
             ? null
             : () => _procesarImagen(marcarAtendida: false),
         icon: const Icon(Icons.add_photo_alternate, size: 18),
-        label: const Text('+ Imagen'),
+        label: const Text(AppStrings.imagenAgregar),
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           foregroundColor: cs.primary,
@@ -183,7 +188,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
   Widget _buildBotonMarcarAtendida(ColorScheme cs) {
     final puedeMarcar = !_isUploading && _imagenesDespes > 0;
     final textoBoton = _textoProgreso ??
-        (_isUploading ? 'Subiendo imagen...' : 'Marcar como Atendida');
+        (_isUploading ? AppStrings.imagenSubiendo : AppStrings.marcarAtendidaBoton);
 
     return Padding(
       padding: const EdgeInsets.only(top: 12),
@@ -194,7 +199,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
             Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Text(
-                'Sube al menos una foto "Después" para habilitar este botón',
+                AppStrings.marcarAtendidaHint,
                 style: TextStyle(fontSize: 11, color: cs.tertiary),
                 textAlign: TextAlign.center,
               ),
@@ -251,6 +256,58 @@ class _SolicitudItemState extends State<SolicitudItem> {
     }
   }
 
+  /// Elimina los archivos temporales creados por image_picker.
+  ///
+  /// Se llama cuando el usuario cancela en el diálogo de confirmación para
+  /// no dejar archivos huérfanos en el almacenamiento temporal del dispositivo.
+  void _limpiarArchivosTemp(List<String> paths) {
+    for (final path in paths) {
+      try {
+        final file = File(path);
+        if (file.existsSync()) file.deleteSync();
+      } catch (_) {
+        // Ignorar errores de limpieza; son archivos temporales del sistema.
+      }
+    }
+  }
+
+  /// Muestra un diálogo de confirmación antes de enviar imagen(es).
+  ///
+  /// La opción "No" es la predeterminada (autofocus). Devuelve true si
+  /// el usuario confirma con "Sí", false si cancela o cierra el diálogo.
+  Future<bool> _confirmarSubida(int cantidadImagenes) async {
+    final cs = Theme.of(context).colorScheme;
+    final texto = cantidadImagenes == 1
+        ? AppStrings.confirmarEnvioMensajeUno
+        : AppStrings.confirmarEnvioMensajePlural(cantidadImagenes);
+
+    final confirmar = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text(AppStrings.confirmarEnvioTitulo),
+        content: Text(texto),
+        actions: [
+          // "No" es el botón predeterminado (autofocus + FilledButton)
+          FilledButton(
+            autofocus: true,
+            onPressed: () => Navigator.pop(ctx, false),
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.surfaceContainerHighest,
+              foregroundColor: cs.onSurfaceVariant,
+            ),
+            child: const Text(AppStrings.confirmarNo),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(AppStrings.confirmarSi),
+          ),
+        ],
+      ),
+    );
+    return confirmar ?? false;
+  }
+
   /// Flujo para cámara: una foto con su propio metadata sheet.
   Future<void> _procesarImagenCamara({required bool marcarAtendida}) async {
     final picker = ImagePicker();
@@ -264,6 +321,12 @@ class _SolicitudItemState extends State<SolicitudItem> {
 
     final metadatos = await ImageMetadataSheet.show(context, imagen.path);
     if (metadatos == null || !mounted) return;
+
+    // Confirmar antes de enviar; si cancela, eliminar el archivo temporal
+    if (!await _confirmarSubida(1) || !mounted) {
+      _limpiarArchivosTemp([imagen.path]);
+      return;
+    }
 
     setState(() {
       _isUploading = true;
@@ -281,6 +344,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
       soloImagen: !marcarAtendida,
       onImageUploaded: (imagen) {
         setState(() {
+          imagen.tipoFoto = metadatos.tipoFoto.valor;
           _imagenesLocales.add(imagen);
           if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
         });
@@ -316,6 +380,12 @@ class _SolicitudItemState extends State<SolicitudItem> {
       final metadatos = await ImageMetadataSheet.show(context, paths.first);
       if (metadatos == null || !mounted) return;
 
+      // Confirmar antes de enviar; si cancela, eliminar el archivo temporal
+      if (!await _confirmarSubida(1) || !mounted) {
+        _limpiarArchivosTemp(paths);
+        return;
+      }
+
       setState(() {
         _isUploading = true;
         _textoProgreso = null;
@@ -332,6 +402,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
         soloImagen: !marcarAtendida,
         onImageUploaded: (img) {
           setState(() {
+            img.tipoFoto = metadatos.tipoFoto.valor;
             _imagenesLocales.add(img);
             if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
           });
@@ -355,9 +426,15 @@ class _SolicitudItemState extends State<SolicitudItem> {
     final metadatos = await MultiImageMetadataSheet.show(context, paths);
     if (metadatos == null || !mounted) return;
 
+    // Confirmar antes de enviar; si cancela, eliminar todos los archivos temporales
+    if (!await _confirmarSubida(paths.length) || !mounted) {
+      _limpiarArchivosTemp(paths);
+      return;
+    }
+
     setState(() {
       _isUploading = true;
-      _textoProgreso = 'Preparando...';
+      _textoProgreso = AppStrings.preparando;
     });
 
     final MultiUploadResult multiResult =
@@ -378,6 +455,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
       onImageUploaded: (img) {
         if (mounted) {
           setState(() {
+            img.tipoFoto = metadatos.tipoFoto.valor;
             _imagenesLocales.add(img);
             if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
           });
@@ -414,17 +492,17 @@ class _SolicitudItemState extends State<SolicitudItem> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera),
-              title: const Text('Tomar Foto'),
+              title: const Text(AppStrings.imagenFuenteTomarFoto),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library),
-              title: const Text('Seleccionar de Galería'),
+              title: const Text(AppStrings.imagenFuenteGaleria),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
             ListTile(
               leading: const Icon(Icons.cancel),
-              title: const Text('Cancelar'),
+              title: const Text(AppStrings.cancelar),
               onTap: () => Navigator.pop(ctx),
             ),
           ],
@@ -441,6 +519,85 @@ class _SolicitudItemState extends State<SolicitudItem> {
         imagenes: _imagenesLocales,
         indiceInicial: indice,
       ),
+    );
+  }
+
+  /// Solicita confirmación y elimina la imagen en el índice indicado.
+  ///
+  /// Solo procede si la imagen tiene un ID asignado por el servidor.
+  Future<void> _eliminarImagen(int indice) async {
+    final imagen = _imagenesLocales[indice];
+    if (imagen == null) return;
+    if (imagen.id == null) {
+      await ResultDialog.show(
+        context,
+        type: ResultType.warning,
+        message: AppStrings.imagenSinId,
+      );
+      return;
+    }
+
+    final cs = Theme.of(context).colorScheme;
+
+    final confirmar = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text(AppStrings.imagenEliminarConfirmTitulo),
+        content: const Text(AppStrings.imagenEliminarConfirmMensaje),
+        actions: [
+          FilledButton(
+            autofocus: true,
+            onPressed: () => Navigator.pop(ctx, false),
+            style: FilledButton.styleFrom(
+              backgroundColor: cs.surfaceContainerHighest,
+              foregroundColor: cs.onSurfaceVariant,
+            ),
+            child: const Text(AppStrings.confirmarNo),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: cs.error),
+            child: const Text(AppStrings.imagenEliminarConfirmTitulo),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true || !mounted) return;
+
+    setState(() => _isUploading = true);
+
+    final result = await _imageUploader.eliminarImagen(
+      denunciaId: widget.solicitud.solicitudId,
+      imagenId: imagen.id!,
+    );
+
+    if (!mounted) return;
+
+    final exito = result is res.Success<bool> && result.data == true;
+    final errorMsg = result is res.Error<bool>
+        ? result.msg
+        : AppStrings.imagenEliminarError;
+
+    setState(() {
+      _isUploading = false;
+      if (exito) {
+        _imagenesLocales.removeAt(indice);
+        // Recontamos imágenes "después" por si se eliminó una.
+        _imagenesDespes = _imagenesLocales
+            .where((img) {
+              final tipo = img?.tipoFoto.trim().toLowerCase() ?? '';
+              return tipo == 'despues' || tipo == 'después';
+            })
+            .length;
+      }
+    });
+
+    await ResultDialog.show(
+      context,
+      type: exito ? ResultType.success : ResultType.error,
+      message: exito ? AppStrings.imagenEliminarExito : errorMsg,
     );
   }
 }

@@ -33,32 +33,30 @@ class NoTienesCuentaAun extends StatelessWidget {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Colors.blue.shade50, Colors.white],
-                      ),
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
                     ),
-                    child: Column(
+                    child: Builder(builder: (context) {
+                      final cs = Theme.of(context).colorScheme;
+                      return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(icono, size: 60, color: color),
                         const SizedBox(height: 16),
-                        const Text(
+                        Text(
                           '¡Atención!',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: cs.onSurface,
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           mensaje,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black54,
+                            color: cs.onSurfaceVariant,
                             height: 1.5,
                           ),
                         ),
@@ -76,32 +74,36 @@ class NoTienesCuentaAun extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Entendido',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: cs.onPrimary,
                               ),
                             ),
                           ),
                         ),
                       ],
-                    ),
+                      );
+                    }),
                   ),
                 );
               },
             );
           },
-          child: Text(
-            titulo,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              decoration: TextDecoration.underline,
-              decorationColor: Colors.white,
-            ),
-          ),
+          child: Builder(builder: (context) {
+            final onBg = Theme.of(context).colorScheme.onInverseSurface;
+            return Text(
+              titulo,
+              style: TextStyle(
+                color: onBg,
+                fontSize: 18,
+                decoration: TextDecoration.underline,
+                decorationColor: onBg,
+              ),
+            );
+          }),
         ),
       ],
     );

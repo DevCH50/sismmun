@@ -165,3 +165,49 @@ lib/src/
   - Indicador de resultados
   - Botón para limpiar búsqueda
   - Compatible con tema claro/oscuro
+
+### AppTheme + Material Theme Builder (2026-03-18) ✅ APROBADO
+- **Ubicación:** `lib/src/core/theme/`
+  - `material_theme.dart` — ColorScheme completo light/dark generado con Material Theme Builder
+  - `app_theme.dart` — ThemeData completo con todos los componentes (AppBar, botones, inputs, cards, dialogs, FAB, ListTile, Divider, SnackBar, ProgressIndicator, Checkbox, Switch, NavigationBar)
+- **Uso en main.dart:**
+  ```dart
+  theme: AppTheme.light,
+  darkTheme: AppTheme.dark,
+  themeMode: ThemeMode.system,
+  ```
+- **Regla obligatoria:** Nunca usar colores hardcodeados (`Colors.red`, etc.). Siempre `Theme.of(context).colorScheme`.
+
+### Mejoras Login (2026-03-18) ✅ APROBADO
+- **LoginPage** — Teclado ya no oculta el botón "Iniciar Sesión":
+  - Fondo (`LoginBackGround`) vive fuera del Scaffold en un Stack raíz
+  - `Scaffold(resizeToAvoidBottomInset: true)` encoge el body cuando aparece el teclado
+  - `ScrollController` + `_scrollAlFinal()` con `addPostFrameCallback` anima hasta `maxScrollExtent`
+  - `SingleChildScrollView` con `keyboardDismissBehavior.onDrag`
+- **LoginContent** — Eliminados: "¿Olvidaste tu contraseña?", "¿No tienes una cuenta?"
+- **LogoRedondoUno** — Tamaño reducido 35%: de 150×150 → 98×98
+- **DefaultTextField** — `filled: false` para evitar fondo blanco del AppTheme; `enableIMEPersonalizedLearning: false` para suprimir Teclado Seguro Samsung
+- **PrimaryElevatedButton** — Color del texto adaptativo con `ThemeData.estimateBrightnessForColor()` para garantizar legibilidad siempre
+
+### Corrección de colores hardcodeados (2026-03-18) ✅ APROBADO
+Todos los `Colors.X` reemplazados con `Theme.of(context).colorScheme` en:
+- `SolicitudItem.dart` — grey/orange/blue/green/white → `onSurfaceVariant`/`tertiary`/`primary`/`onPrimary`
+- `SolicitudGaleria.dart` — grey/blue → `onSurfaceVariant`/`primary`
+- `SolicitudMiniatura.dart` — grey/red → `outlineVariant`/`errorContainer`/`error`/`onSurfaceVariant`; etiqueta tipo_foto con color semántico
+- `ImageMetadataSheet.dart` — grises → colorScheme; typo "Observaciónes" → "Observaciones"
+- `MultiImageMetadataSheet.dart` — black54/white → `onSurface`/`surface`
+- `HomePage.dart` — orange/red/white → `tertiary`/`error`/`onError`
+
+### ApiConfig.fixImageUrl() aplicado (2026-03-18) ✅ APROBADO
+- `SolicitudMiniatura.dart` — `ApiConfig.fixImageUrl(imagen.urlThumb)` en `Image.network`
+- `VisorImagenesCompleto.dart` — `ApiConfig.fixImageUrl(imagen.urlImagen)` en `Image.network`
+- Resuelve el problema de URLs `localhost:8000` que los dispositivos físicos no pueden resolver en debug
+
+### SolicitudMiniatura — Etiqueta tipo_foto (2026-03-18) ✅ APROBADO
+- Overlay `Stack`+`Positioned` en la parte inferior de cada miniatura
+- Color semántico: "después" → `cs.primary`, "antes" → `cs.secondary`
+- SafeArea aplicado en `VisorImagenesCompleto` para notch iOS
+
+### Inicialización correcta del contador de imágenes (2026-03-18) ✅ APROBADO
+- `SolicitudItem.initState()` ahora cuenta las imágenes existentes con `tipo_foto == 'después'/'despues'`
+- El botón "Marcar como Atendida" se habilita correctamente al cargar solicitudes que ya tienen imágenes

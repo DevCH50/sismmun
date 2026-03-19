@@ -30,6 +30,7 @@ void main() {
         estatusId: 17,
         servicioId: 5,
         imagenPath: '/tmp/foto.jpg',
+        userId: 1,
       );
 
       expect(request.solicitudId, equals(1));
@@ -38,6 +39,7 @@ void main() {
       expect(request.servicioId, equals(5));
       expect(request.imagenPath, equals('/tmp/foto.jpg'));
       expect(request.soloImagen, isFalse); // valor por defecto
+      expect(request.userId, equals(1));
     });
 
     test('campo observaciones se guarda correctamente', () {
@@ -48,6 +50,7 @@ void main() {
         servicioId: 5,
         imagenPath: '/tmp/foto.jpg',
         observaciones: 'Trabajo terminado',
+        userId: 1,
       );
       expect(request.observaciones, equals('Trabajo terminado'));
     });
@@ -60,6 +63,7 @@ void main() {
         servicioId: 5,
         imagenPath: '/tmp/foto.jpg',
         tipoFoto: TipoFoto.despues,
+        userId: 1,
       );
       expect(request.tipoFoto, equals(TipoFoto.despues));
     });
@@ -73,6 +77,7 @@ void main() {
         imagenPath: '/tmp/foto.jpg',
         observaciones: 'Test',
         tipoFoto: TipoFoto.antes,
+        userId: 1,
       );
       final map = request.toMap();
       expect(map.containsKey('observaciones'), isTrue,
@@ -88,6 +93,7 @@ void main() {
         servicioId: 5,
         imagenPath: '/tmp/foto.jpg',
         tipoFoto: TipoFoto.despues,
+        userId: 1,
       );
       final map = request.toMap();
       expect(map['tipo_foto'], equals('despues'));
@@ -96,11 +102,11 @@ void main() {
     test('soloImagen se serializa a "1" y "0"', () {
       final requestSolo = SubirImagenRequest(
         solicitudId: 1, dependenciaId: 2, estatusId: 17,
-        servicioId: 5, imagenPath: '/tmp/foto.jpg', soloImagen: true,
+        servicioId: 5, imagenPath: '/tmp/foto.jpg', soloImagen: true, userId: 1,
       );
       final requestNoSolo = SubirImagenRequest(
         solicitudId: 1, dependenciaId: 2, estatusId: 17,
-        servicioId: 5, imagenPath: '/tmp/foto.jpg', soloImagen: false,
+        servicioId: 5, imagenPath: '/tmp/foto.jpg', soloImagen: false, userId: 1,
       );
       expect(requestSolo.toMap()['solo_imagen'], equals('1'));
       expect(requestNoSolo.toMap()['solo_imagen'], equals('0'));
@@ -109,11 +115,19 @@ void main() {
     test('latitud y longitud null se serializan a string vacío', () {
       final request = SubirImagenRequest(
         solicitudId: 1, dependenciaId: 2, estatusId: 17,
-        servicioId: 5, imagenPath: '/tmp/foto.jpg',
+        servicioId: 5, imagenPath: '/tmp/foto.jpg', userId: 1,
       );
       final map = request.toMap();
       expect(map['latitud'], equals(''));
       expect(map['longitud'], equals(''));
+    });
+
+    test('toMap incluye user_id correcto', () {
+      final request = SubirImagenRequest(
+        solicitudId: 1, dependenciaId: 2, estatusId: 17,
+        servicioId: 5, imagenPath: '/tmp/foto.jpg', userId: 42,
+      );
+      expect(request.toMap()['user_id'], equals('42'));
     });
   });
 }

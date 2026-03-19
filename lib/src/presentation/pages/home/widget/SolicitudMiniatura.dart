@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 
@@ -16,10 +17,14 @@ class SolicitudMiniatura extends StatelessWidget {
   /// Callback invocado cuando se toca la miniatura de imagen (no PDF).
   final VoidCallback onTap;
 
+  /// Callback opcional para eliminar la imagen. Si es nulo el botón no se muestra.
+  final VoidCallback? onEliminar;
+
   const SolicitudMiniatura({
     super.key,
     required this.imagen,
     required this.onTap,
+    this.onEliminar,
   });
 
   // ---------------------------------------------------------------------------
@@ -42,7 +47,7 @@ class SolicitudMiniatura extends StatelessWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.open_in_browser),
-              title: const Text('Abrir PDF'),
+              title: const Text(AppStrings.imagenPdfAbrir),
               onTap: () {
                 Navigator.pop(ctx);
                 _abrirPdf(url);
@@ -50,7 +55,7 @@ class SolicitudMiniatura extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.share),
-              title: const Text('Compartir'),
+              title: const Text(AppStrings.imagenPdfCompartir),
               onTap: () {
                 Navigator.pop(ctx);
                 _compartirPdf(url);
@@ -58,7 +63,7 @@ class SolicitudMiniatura extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.cancel),
-              title: const Text('Cancelar'),
+              title: const Text(AppStrings.cancelar),
               onTap: () => Navigator.pop(ctx),
             ),
           ],
@@ -95,7 +100,7 @@ class SolicitudMiniatura extends StatelessWidget {
             Icon(Icons.picture_as_pdf, color: cs.error, size: 32),
             const SizedBox(height: 4),
             Text(
-              'PDF',
+              AppStrings.imagenPdfEtiqueta,
               style: TextStyle(
                 fontSize: 10,
                 color: cs.error,
@@ -207,6 +212,30 @@ class SolicitudMiniatura extends StatelessWidget {
                         color: cs.onPrimary,
                         fontSize: 9,
                         fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Botón eliminar (esquina superior derecha)
+              // Visible solo si el backend indica que la imagen es eliminable.
+              if (onEliminar != null && imagen.isEliminable)
+                Positioned(
+                  top: 2,
+                  right: 2,
+                  child: GestureDetector(
+                    onTap: onEliminar,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: cs.errorContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close,
+                        size: 13,
+                        color: cs.onErrorContainer,
                       ),
                     ),
                   ),

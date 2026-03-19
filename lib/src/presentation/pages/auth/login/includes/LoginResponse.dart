@@ -51,8 +51,10 @@ class LoginResponse extends StatelessWidget {
             (previous.response is Loading) != (current.response is Loading),
         builder: (context, state) {
           if (state.response is Loading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.blue),
+            return Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).colorScheme.primary,
+              ),
             );
           }
           return const SizedBox.shrink();

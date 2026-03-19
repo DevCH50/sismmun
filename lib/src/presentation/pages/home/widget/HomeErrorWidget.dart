@@ -20,30 +20,32 @@ class HomeErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 64,
-              color: Colors.red,
+              color: cs.error,
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Error',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               errorMessage,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red.shade700),
+              style: TextStyle(color: cs.error),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(

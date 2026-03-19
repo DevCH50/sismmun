@@ -8,6 +8,7 @@ import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
 import 'package:sismmun/src/data/api/Endpoints.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
+import 'package:sismmun/src/domain/models/EliminarImagenRequest.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
 import 'package:sismmun/src/domain/useCases/auth/AuthUseCases.dart';
@@ -34,7 +35,6 @@ class SolicitudService {
         throw Exception(AppStrings.errorNoSession);
       }
 
-      final int userId = authResponse.user.id;
       final String token = authResponse.accessToken;
 
       final uri = ApiConfig.buildUri(Endpoints.agregarImagen);
@@ -43,7 +43,7 @@ class SolicitudService {
       final imagenBase64 = base64Encode(bytes);
 
       final body = <String, dynamic>{
-        'user_id': userId,
+        'user_id': request.userId,
         'solo_imagen': request.soloImagen ? 1 : 0,
         'denuncia_id': request.solicitudId,
         'dependencia_id': request.dependenciaId,
@@ -87,11 +87,15 @@ class SolicitudService {
         );
 
         return Imagen(
-          fecha: DateTime.now().toString(),
+          id: data['imagen_id'],
+          fecha: data['fecha'] ?? DateTime.now().toString(),
           urlImagen: data['url_imagen'] ?? '',
           urlThumb: data['url_thumb'] ?? '',
+          observaciones: data['observaciones'] ?? '',
+          tipoFoto: data['tipo_foto'] ?? '',
           status: status,
           msg: msg,
+          isEliminable: data['es_eliminable'] ?? false,
         );
       } else {
         throw Exception(
@@ -103,6 +107,57 @@ class SolicitudService {
       throw Exception(AppStrings.errorTimeout);
     } catch (e) {
       AppLogger.error('Error en subirImagen: $e', tag: 'Solicitud');
+      rethrow;
+    }
+  }
+
+  /// Elimina una imagen de una solicitud.
+  ///
+  /// [request] - IDs de la denuncia y la imagen a eliminar.
+  /// Lanza [Exception] si la petición falla.
+  Future<void> eliminarImagen(EliminarImagenRequest request) async {
+    try {
+      final AuthResponse? authResponse = await authUseCases.getUserSession.run();
+
+      if (authResponse == null) {
+        throw Exception(AppStrings.errorNoSession);
+      }
+
+      final String token = authResponse.accessToken;
+      final uri = ApiConfig.buildUri(Endpoints.eliminarImagen);
+
+      AppLogger.httpRequest('POST', uri.toString());
+
+      final response = await http
+          .post(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: json.encode(request.toMap()),
+          )
+          .timeout(AppDurations.httpTimeout);
+
+      AppLogger.httpResponse(response.statusCode, uri.toString());
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body);
+        final int status = data['status'] ?? 0;
+        if (status != 1) {
+          throw Exception(data['msg'] ?? AppStrings.imagenEliminarError);
+        }
+      } else {
+        throw Exception(
+          'Error del servidor: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } on TimeoutException {
+      AppLogger.error('Timeout al eliminar imagen', tag: 'Solicitud');
+      throw Exception(AppStrings.errorTimeout);
+    } catch (e) {
+      AppLogger.error('Error en eliminarImagen: $e', tag: 'Solicitud');
       rethrow;
     }
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:sismmun/src/data/dataSource/local/ImageCompressor.dart';
 import 'package:sismmun/src/data/dataSource/local/SharedPref.dart';
 import 'package:sismmun/src/data/dataSource/remote/services/SolicitudService.dart';
+import 'package:sismmun/src/domain/models/EliminarImagenRequest.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
 import 'package:sismmun/src/domain/repository/SolicitudRepository.dart';
@@ -43,12 +44,24 @@ class SolicitudRepositoryImpl implements SolicitudRepository {
         soloImagen: request.soloImagen,
         observaciones: request.observaciones,
         tipoFoto: request.tipoFoto,
+        userId: request.userId,
       );
 
       final imagen = await solicitudService.subirImagen(requestComprimida);
       return Success(imagen);
     } catch (e) {
       return Error(e.toString());
+    }
+  }
+
+  @override
+  Future<Resource<bool>> eliminarImagen(EliminarImagenRequest request) async {
+    try {
+      await solicitudService.eliminarImagen(request);
+      return Success(true);
+    } catch (e) {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      return Error(msg);
     }
   }
 
@@ -61,6 +74,4 @@ class SolicitudRepositoryImpl implements SolicitudRepository {
       return Error(e.toString());
     }
   }
-
-
 }

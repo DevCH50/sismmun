@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginBloc.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
@@ -80,7 +80,7 @@ class _SplashPageState extends State<SplashPage> {
         _navigateBasedOnState(currentState);
       }
     } catch (e) {
-      if (kDebugMode) print('❌ Error en splash: $e');
+      AppLogger.error('Error en splash: $e', tag: 'Splash');
       if (mounted && !_hasNavigated) {
         _hasNavigated = true;
         Navigator.pushReplacementNamed(context, 'login');
@@ -115,75 +115,90 @@ class _SplashPageState extends State<SplashPage> {
         }
       },
       child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color.fromARGB(255, 112, 2, 2), Color.fromARGB(255, 229, 30, 30)],
-            ),
-          ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 20,
-                        offset: Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.camera, size: 60, color: Color.fromARGB(255, 229, 30, 30)),
+        body: Builder(
+          builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            final onBg = cs.onPrimary;
+            return Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [cs.inverseSurface, cs.primary],
                 ),
-                const SizedBox(height: 48),
-                const Text(
-                  'SISMMUN',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Sistema de Monitoreo Municipal',
-                  style: TextStyle(fontSize: 14, color: Colors.white70),
-                ),
-                const SizedBox(height: 48),
-                SizedBox(
-                  width: 200,
-                  child: Column(
-                    children: [
-                      LinearProgressIndicator(
-                        value: _progress,
-                        backgroundColor: Colors.white30,
-                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                        minHeight: 4,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerLowest,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: cs.shadow.withAlpha(66),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        _statusText,
-                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      child: Icon(Icons.camera, size: 60, color: cs.primary),
+                    ),
+                    const SizedBox(height: 48),
+                    Text(
+                      'SISMMUN',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: onBg,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${(_progress * 100).toInt()}%',
-                        style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Sistema de Monitoreo Municipal',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: onBg.withValues(alpha: 0.7),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 48),
+                    SizedBox(
+                      width: 200,
+                      child: Column(
+                        children: [
+                          LinearProgressIndicator(
+                            value: _progress,
+                            backgroundColor: onBg.withValues(alpha: 0.3),
+                            valueColor: AlwaysStoppedAnimation<Color>(onBg),
+                            minHeight: 4,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _statusText,
+                            style: TextStyle(
+                              color: onBg.withValues(alpha: 0.7),
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${(_progress * 100).toInt()}%',
+                            style: TextStyle(
+                              color: onBg.withValues(alpha: 0.54),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

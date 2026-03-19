@@ -1,15 +1,25 @@
 import 'package:image_picker/image_picker.dart';
+import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/injection.dart';
+import 'package:sismmun/src/domain/models/EliminarImagenRequest.dart';
 import 'package:sismmun/src/domain/models/Imagen.dart';
 import 'package:sismmun/src/domain/models/ImageUploadResult.dart';
 import 'package:sismmun/src/domain/models/MultiUploadResult.dart';
 import 'package:sismmun/src/domain/models/SubirImagenRequest.dart';
+import 'package:sismmun/src/domain/useCases/auth/AuthUseCases.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/SolicitudUseCases.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
 import 'package:sismmun/src/presentation/utils/LocationHelper.dart';
 
 class ImageUploaderHelper {
   final ImagePicker _picker = ImagePicker();
+
+  /// Obtiene el userId de la sesión activa. Retorna 0 si no hay sesión.
+  Future<int> _getUserId() async {
+    final authUseCases = locator<AuthUseCases>();
+    final session = await authUseCases.getUserSession.run();
+    return session?.user.id ?? 0;
+  }
 
   /// Selecciona una imagen y la sube al servidor
   /// Devuelve el resultado con la imagen si fue exitosa
@@ -41,8 +51,13 @@ class ImageUploaderHelper {
 
       onUploadingChanged(true);
 
-      // Obtener ubicación
-      final ubicacion = await LocationHelper.obtenerUbicacion();
+      // Obtener ubicación y userId en paralelo
+      final results = await Future.wait([
+        LocationHelper.obtenerUbicacion(),
+        _getUserId(),
+      ]);
+      final ubicacion = results[0] as dynamic;
+      final userId = results[1] as int;
 
       // Crear request con ubicación y metadatos
       final request = SubirImagenRequest(
@@ -56,6 +71,7 @@ class ImageUploaderHelper {
         soloImagen: soloImagen,
         observaciones: observaciones,
         tipoFoto: tipoFoto,
+        userId: userId,
       );
 
       // Obtener el useCase de GetIt
@@ -79,7 +95,7 @@ class ImageUploaderHelper {
         return ImageUploadResult.error(result.msg);
       }
 
-      return ImageUploadResult.error('Error desconocido');
+      return ImageUploadResult.error(AppStrings.errorDesconocido);
     } catch (e) {
       onUploadingChanged(false);
       return ImageUploadResult.error(e.toString());
@@ -106,8 +122,13 @@ class ImageUploaderHelper {
     bool soloImagen = false,
   }) async {
     try {
-      // Obtener ubicación
-      final ubicacion = await LocationHelper.obtenerUbicacion();
+      // Obtener ubicación y userId en paralelo
+      final results = await Future.wait([
+        LocationHelper.obtenerUbicacion(),
+        _getUserId(),
+      ]);
+      final ubicacion = results[0] as dynamic;
+      final userId = results[1] as int;
 
       // Crear request con ubicación y metadatos
       final request = SubirImagenRequest(
@@ -121,6 +142,7 @@ class ImageUploaderHelper {
         soloImagen: soloImagen,
         observaciones: observaciones,
         tipoFoto: tipoFoto,
+        userId: userId,
       );
 
       // Obtener el useCase de GetIt
@@ -142,7 +164,7 @@ class ImageUploaderHelper {
         return ImageUploadResult.error(result.msg);
       }
 
-      return ImageUploadResult.error('Error desconocido');
+      return ImageUploadResult.error(AppStrings.errorDesconocido);
     } catch (e) {
       return ImageUploadResult.error(e.toString());
     }
@@ -192,7 +214,7 @@ class ImageUploaderHelper {
         exitosas++;
       } else {
         errores++;
-        mensajesError.add(result?.message ?? 'Error desconocido');
+        mensajesError.add(result?.message ?? AppStrings.errorDesconocido);
       }
     }
 
@@ -202,5 +224,28 @@ class ImageUploaderHelper {
       mensajesError: mensajesError,
       total: imagePaths.length,
     );
+  }
+
+  /// Elimina una imagen del servidor.
+  ///
+  /// [denunciaId] - ID de la solicitud a la que pertenece la imagen.
+  /// [imagenId] - ID de la imagen a eliminar.
+  /// Retorna `Success(true)` si se eliminó, `Error(msg)` con el mensaje del backend.
+  Future<Resource<bool>> eliminarImagen({
+    required int denunciaId,
+    required int imagenId,
+  }) async {
+    try {
+      final userId = await _getUserId();
+      final solicitudUseCases = locator<SolicitudUseCases>();
+      final request = EliminarImagenRequest(
+        denunciaId: denunciaId,
+        imagenId: imagenId,
+        userId: userId,
+      );
+      return await solicitudUseCases.eliminarImagen.run(request);
+    } catch (e) {
+      return Error(e.toString().replaceFirst('Exception: ', ''));
+    }
   }
 }

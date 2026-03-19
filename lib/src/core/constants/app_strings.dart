@@ -12,6 +12,12 @@ class AppStrings {
   static const String appName = 'SisMMun';
   static const String appDescription = 'Sistema Municipal de Mantenimiento';
 
+  static const String cancelar = 'Cancelar';
+  static const String confirmarNo = 'No';
+  static const String confirmarSi = 'Sí';
+  static const String errorDesconocido = 'Error desconocido';
+  static const String preparando = 'Preparando...';
+
   // ============================================================================
   // SPLASH
   // ============================================================================
@@ -62,6 +68,18 @@ class AppStrings {
   static const String homeError = 'Error al cargar';
   static const String homeSearchHint = 'Buscar solicitud...';
 
+  static const String imagenAgregar = '+ Imagen';
+  static const String marcarAtendidaBoton = 'Marcar como Atendida';
+  static const String marcarAtendidaHint =
+      'Sube al menos una foto "Después" para habilitar este botón';
+  static const String confirmarEnvioTitulo = 'Confirmar envío';
+  static const String confirmarEnvioMensajeUno =
+      '¿Desea enviar la imagen seleccionada?';
+  static String confirmarEnvioMensajePlural(int n) =>
+      '¿Desea enviar las $n imágenes seleccionadas?';
+  static const String imagenFuenteTomarFoto = 'Tomar Foto';
+  static const String imagenFuenteGaleria = 'Seleccionar de Galería';
+
   // ============================================================================
   // IMÁGENES
   // ============================================================================
@@ -69,6 +87,7 @@ class AppStrings {
   static const String imagenSubiendo = 'Subiendo imagen...';
   static const String imagenExito = 'Imagen subida correctamente';
   static const String imagenError = 'Error al subir la imagen';
+  static const String imagenErrorCargar = 'Error al cargar la imagen';
   static const String imagenSeleccionarFuente = 'Seleccionar fuente';
   static const String imagenCamara = 'Cámara';
   static const String imagenGaleria = 'Galería';
@@ -77,6 +96,23 @@ class AppStrings {
   static const String imagenObservacionRequired = 'La observación es obligatoria';
   static const String imagenTipoAntes = 'Antes';
   static const String imagenTipoDespues = 'Después';
+  static const String imagenEliminarConfirmTitulo = 'Eliminar imagen';
+  static const String imagenEliminarConfirmMensaje =
+      '¿Deseas eliminar esta imagen? Esta acción no se puede deshacer.';
+  static const String imagenEliminarExito = 'Imagen eliminada correctamente';
+  static const String imagenEliminarError = 'Error al eliminar la imagen';
+  static const String imagenSinId =
+      'No se puede eliminar esta imagen. Recarga la solicitud e intenta de nuevo.';
+  static const String imagenPdfAbrir = 'Abrir PDF';
+  static const String imagenPdfCompartir = 'Compartir';
+  static const String imagenPdfEtiqueta = 'PDF';
+
+  // ============================================================================
+  // DRAWER
+  // ============================================================================
+
+  static const String drawerVersiones = 'Versiones';
+  static String drawerCopiado(String texto) => 'Copiado: $texto';
 
   // ============================================================================
   // LOGOUT

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+// ignore_for_file: avoid_hardcoded_colors — Los colores blancos son intencionales:
+// DefaultTextField está diseñado exclusivamente para formularios sobre fondos
+// oscuros (ej. pantalla de login con imagen de fondo). Los colores blancos
+// garantizan legibilidad en ambos temas sobre esa superficie.
 
 class DefaultTextField extends StatefulWidget {
   final String label;
@@ -119,25 +123,3 @@ class _DefaultTextFieldState extends State<DefaultTextField> {
 }
 
 
-// Para fondos Oscuros
-
-// errorColor: Colors.yellowAccent,
-// errorFontSize: 14.0,
-// errorFontWeight: FontWeight.w600,
-// errorWithShadow: true,
-
-
-// Para fondos Claros
-
-// errorColor: Colors.red.shade700,
-// errorFontSize: 13.0,
-// errorFontWeight: FontWeight.w500,
-// errorWithShadow: false,
-
-
-// Fondo con Imagen
-
-// errorColor: Colors.white,
-// errorFontSize: 15.0,
-// errorFontWeight: FontWeight.bold,
-// errorWithShadow: true,

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:sismmun/src/core/utils/app_logger.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
 import 'package:sismmun/src/domain/useCases/auth/AuthUseCases.dart';
 import 'package:sismmun/src/domain/utils/Resource.dart';
@@ -28,7 +28,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     final AuthResponse? authResponse = await authUseCases.getUserSession.run();
-    if (kDebugMode) print('USUARIO DE SESSION: ${authResponse?.toJson()}');
+    AppLogger.debug('USUARIO DE SESSION: ${authResponse?.toJson()}', tag: 'Login');
     emit(state.copyWith(formKey: formKey));
     if (authResponse != null) {
       emit(state.copyWith(response: Success(authResponse), formKey: formKey));

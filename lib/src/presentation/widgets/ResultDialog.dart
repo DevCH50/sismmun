@@ -23,16 +23,45 @@ extension ResultTypeExtension on ResultType {
     }
   }
 
-  Color get color {
+  /// Color principal (ícono y fondo del botón) según el colorScheme del tema.
+  Color resolveColor(ColorScheme cs) {
     switch (this) {
       case ResultType.success:
-        return Colors.green;
+        return cs.tertiary;
       case ResultType.error:
-        return Colors.red;
+        return cs.error;
       case ResultType.warning:
-        return Colors.orange;
+        return cs.primary;
       case ResultType.info:
-        return Colors.blue;
+        return cs.secondary;
+    }
+  }
+
+  /// Color de relleno del círculo de fondo del ícono.
+  Color resolveColorContainer(ColorScheme cs) {
+    switch (this) {
+      case ResultType.success:
+        return cs.tertiaryContainer;
+      case ResultType.error:
+        return cs.errorContainer;
+      case ResultType.warning:
+        return cs.primaryContainer;
+      case ResultType.info:
+        return cs.secondaryContainer;
+    }
+  }
+
+  /// Color del texto/ícono sobre el botón principal.
+  Color resolveOnColor(ColorScheme cs) {
+    switch (this) {
+      case ResultType.success:
+        return cs.onTertiary;
+      case ResultType.error:
+        return cs.onError;
+      case ResultType.warning:
+        return cs.onPrimary;
+      case ResultType.info:
+        return cs.onSecondary;
     }
   }
 
@@ -188,13 +217,13 @@ class ResultDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: type.color.withAlpha(30),
+              color: type.resolveColorContainer(colorScheme),
               shape: BoxShape.circle,
             ),
             child: Icon(
               type.icon,
               size: 48,
-              color: type.color,
+              color: type.resolveColor(colorScheme),
             ),
           ),
           const SizedBox(height: 20),
@@ -236,8 +265,8 @@ class ResultDialog extends StatelessWidget {
                 onPressed?.call();
               },
               style: FilledButton.styleFrom(
-                backgroundColor: type.color,
-                foregroundColor: Colors.white,
+                backgroundColor: type.resolveColor(colorScheme),
+                foregroundColor: type.resolveOnColor(colorScheme),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

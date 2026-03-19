@@ -1,6 +1,10 @@
+// ignore_for_file: avoid_hardcoded_colors
+// Los colores blancos/negros son intencionales: visor sobre fondo negro.
 import 'package:flutter/material.dart';
 
+import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
+import 'package:sismmun/src/domain/models/Imagen.dart';
 
 /// Widget especializado para visualizar imágenes en pantalla completa
 /// con navegación entre múltiples imágenes
@@ -57,8 +61,8 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
           // Botones de navegación (izquierda y derecha)
           if (widget.imagenes.length > 1) ..._buildBotonesNavegacion(),
 
-          // Información de la fecha (parte inferior)
-          _buildInfoFecha(context),
+          // Información de la imagen (parte inferior)
+          _buildInfoImagen(context),
         ],
       ),
     );
@@ -94,7 +98,7 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
                         Icon(Icons.broken_image, color: Colors.white, size: 64),
                         SizedBox(height: 8),
                         Text(
-                          'Error al cargar la imagen',
+                          AppStrings.imagenErrorCargar,
                           style: TextStyle(color: Colors.white),
                         ),
                       ],
@@ -216,31 +220,88 @@ class _VisorImagenesCompletoState extends State<VisorImagenesCompleto> {
     ];
   }
 
-  /// Construye la información de fecha (respeta home indicator en iOS)
-  Widget _buildInfoFecha(BuildContext context) {
+  /// Construye la información de la imagen en la parte inferior:
+  /// tipo_foto, observaciones y fecha.
+  Widget _buildInfoImagen(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final Imagen? imagen = widget.imagenes[_indiceActual] as Imagen?;
+    if (imagen == null) return const SizedBox.shrink();
+
+    final String tipo = imagen.tipoFoto.trim().toLowerCase();
+    final String etiqueta = tipo == 'despues' || tipo == 'después'
+        ? 'Después'
+        : tipo == 'antes'
+            ? 'Antes'
+            : '';
+    final String obs = imagen.observaciones.trim();
+
     return Positioned(
       bottom: bottomPadding + 16,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.black54,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                widget.imagenes[_indiceActual]?.fecha ?? '',
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+      left: 24,
+      right: 24,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.black54,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Tipo foto + fecha en la misma fila
+            Row(
+              children: [
+                if (etiqueta.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      etiqueta,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                const Icon(Icons.calendar_today, color: Colors.white70, size: 14),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    imagen.fecha,
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+
+            // Observaciones (solo si no están vacías)
+            if (obs.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.notes, color: Colors.white70, size: 14),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      obs,
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ],
-          ),
+          ],
         ),
       ),
     );

@@ -7,6 +7,7 @@ void main() {
   group('Imagen.fromJson', () {
     test('parsea JSON completo correctamente', () {
       final json = {
+        'imagen_id': 42,
         'fecha': '2026-03-17 10:30:00',
         'url_imagen': 'https://siac.villahermosa.gob.mx/img/foto.jpg',
         'url_thumb': 'https://siac.villahermosa.gob.mx/img/thumb.jpg',
@@ -16,11 +17,23 @@ void main() {
 
       final imagen = Imagen.fromJson(json);
 
+      expect(imagen.id, 42);
       expect(imagen.fecha, '2026-03-17 10:30:00');
       expect(imagen.urlImagen, 'https://siac.villahermosa.gob.mx/img/foto.jpg');
       expect(imagen.urlThumb, 'https://siac.villahermosa.gob.mx/img/thumb.jpg');
       expect(imagen.status, 1);
       expect(imagen.msg, 'Imagen subida correctamente');
+    });
+
+    test('parsea imagen_id desde clave "id" como fallback', () {
+      final json = {'id': 99, 'fecha': '', 'url_imagen': '', 'url_thumb': ''};
+      final imagen = Imagen.fromJson(json);
+      expect(imagen.id, 99);
+    });
+
+    test('id es null cuando no hay imagen_id ni id en el JSON', () {
+      final imagen = Imagen.fromJson({'fecha': '', 'url_imagen': '', 'url_thumb': ''});
+      expect(imagen.id, isNull);
     });
 
     test('usa valores por defecto cuando los campos son null', () {

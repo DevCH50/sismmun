@@ -23,8 +23,9 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = esBaja ? Colors.red.shade100 : Colors.blue.shade100;
-    final textColor = esBaja ? Colors.red.shade900 : Colors.blue.shade900;
+    final cs = Theme.of(context).colorScheme;
+    final backgroundColor = esBaja ? cs.errorContainer : cs.primaryContainer;
+    final textColor = esBaja ? cs.onErrorContainer : cs.onPrimaryContainer;
 
     return Stack(
       children: [
@@ -41,9 +42,9 @@ class UserAvatar extends StatelessWidget {
               width: radius * 0.4,
               height: radius * 0.4,
               decoration: BoxDecoration(
-                color: isOnline ? Colors.green : Colors.grey,
+                color: isOnline ? cs.tertiary : cs.onSurfaceVariant,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: cs.surface, width: 2),
               ),
             ),
           ),

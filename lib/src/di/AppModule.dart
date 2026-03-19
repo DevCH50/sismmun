@@ -17,6 +17,7 @@ import 'package:sismmun/src/domain/useCases/auth/LoginUseCase.dart';
 import 'package:sismmun/src/domain/useCases/auth/LogoutUseCase.dart';
 import 'package:sismmun/src/domain/useCases/auth/SaveUserSessionUseCase.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sismmun/src/domain/useCases/solicitudes/EliminarImagenUseCase.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/SolicitudUseCases.dart';
 import 'package:sismmun/src/domain/useCases/solicitudes/SubirImagenUseCase.dart';
 
@@ -64,7 +65,8 @@ abstract class AppModule {
 
   @injectable
   SolicitudUseCases get solicitudUseCases => SolicitudUseCases(
-    subirImagen: SubirImagenUseCase(solicitudRepository)
+    subirImagen: SubirImagenUseCase(solicitudRepository),
+    eliminarImagen: EliminarImagenUseCase(solicitudRepository),
   );
 
 

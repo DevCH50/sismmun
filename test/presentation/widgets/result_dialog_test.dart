@@ -182,20 +182,37 @@ void main() {
   });
 
   group('ResultTypeExtension', () {
-    test('success tiene color verde', () {
-      expect(ResultType.success.color, Colors.green);
+    // Los colores ahora dependen del ColorScheme del tema.
+    // Se verifica que resolveColor/resolveColorContainer/resolveOnColor
+    // devuelvan valores coherentes con el esquema dado.
+    test('success resuelve color de tertiary', () {
+      const cs = ColorScheme.light();
+      expect(ResultType.success.resolveColor(cs), cs.tertiary);
     });
 
-    test('error tiene color rojo', () {
-      expect(ResultType.error.color, Colors.red);
+    test('error resuelve color de error', () {
+      const cs = ColorScheme.light();
+      expect(ResultType.error.resolveColor(cs), cs.error);
     });
 
-    test('warning tiene color naranja', () {
-      expect(ResultType.warning.color, Colors.orange);
+    test('warning resuelve color de primary', () {
+      const cs = ColorScheme.light();
+      expect(ResultType.warning.resolveColor(cs), cs.primary);
     });
 
-    test('info tiene color azul', () {
-      expect(ResultType.info.color, Colors.blue);
+    test('info resuelve color de secondary', () {
+      const cs = ColorScheme.light();
+      expect(ResultType.info.resolveColor(cs), cs.secondary);
+    });
+
+    test('resolveColorContainer devuelve tertiaryContainer para success', () {
+      const cs = ColorScheme.light();
+      expect(ResultType.success.resolveColorContainer(cs), cs.tertiaryContainer);
+    });
+
+    test('resolveOnColor devuelve onError para error', () {
+      const cs = ColorScheme.light();
+      expect(ResultType.error.resolveOnColor(cs), cs.onError);
     });
 
     test('success tiene título "Éxito"', () {

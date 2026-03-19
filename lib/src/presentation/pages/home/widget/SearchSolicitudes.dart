@@ -37,6 +37,7 @@ class _SearchSolicitudesState extends State<SearchSolicitudes> {
           previous.isSearching != current.isSearching ||
           previous.searchQuery != current.searchQuery,
       builder: (context, state) {
+        final cs = Theme.of(context).colorScheme;
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
@@ -44,29 +45,27 @@ class _SearchSolicitudesState extends State<SearchSolicitudes> {
             focusNode: _focusNode,
             decoration: InputDecoration(
               hintText: 'Buscar por ID, servicio, dependencia...',
-              hintStyle: TextStyle(color: Colors.grey.shade500),
-              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              hintStyle: TextStyle(color: cs.onSurfaceVariant),
+              prefixIcon: Icon(Icons.search, color: cs.onSurfaceVariant),
               suffixIcon: state.isSearching
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      icon: Icon(Icons.clear, color: cs.onSurfaceVariant),
                       onPressed: _limpiarBusqueda,
                     )
                   : null,
               filled: true,
-              fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey.shade800
-                  : Colors.white,
+              fillColor: cs.surfaceContainerLow,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                borderSide: BorderSide(color: cs.outlineVariant, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                borderSide: BorderSide(color: cs.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,

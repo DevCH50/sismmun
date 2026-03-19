@@ -26,12 +26,17 @@ class SolicitudGaleria extends StatelessWidget {
   /// Recibe el índice en [imagenes] para abrir el visor en la posición correcta.
   final void Function(int index) onVerImagen;
 
+  /// Callback invocado cuando el usuario solicita eliminar una imagen.
+  /// Recibe el índice en [imagenes]. Si es nulo, no se muestra el botón eliminar.
+  final void Function(int index)? onEliminarImagen;
+
   const SolicitudGaleria({
     super.key,
     required this.imagenes,
     required this.isUploading,
     required this.onAgregarImagen,
     required this.onVerImagen,
+    this.onEliminarImagen,
   });
 
   // ---------------------------------------------------------------------------
@@ -106,6 +111,9 @@ class SolicitudGaleria extends StatelessWidget {
                 return SolicitudMiniatura(
                   imagen: imagen,
                   onTap: () => onVerImagen(index),
+                  onEliminar: onEliminarImagen != null && !isUploading
+                      ? () => onEliminarImagen!(index)
+                      : null,
                 );
               },
             ),
