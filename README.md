@@ -2,7 +2,7 @@
 
 **Sistema de Servicios Municipales**
 
-Aplicación móvil desarrollada en Flutter para la gestión de servicios municipales. Permite a los usuarios reportar y dar seguimiento a solicitudes de servicios como baches, alumbrado público, recolección de basura, entre otros.
+Aplicación móvil desarrollada para la gestión de servicios municipales. Permite a los usuarios reportar y dar seguimiento a solicitudes de servicios como baches, alumbrado público, recolección de basura, entre otros.
 
 ## Plataformas
 
