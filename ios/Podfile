@@ -41,6 +41,7 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
     # Forzar deployment target mínimo 13.0 en todos los pods
     # para evitar warnings de APIs deprecadas (libwebp, SDWebImage, etc.)
     target.build_configurations.each do |config|
@@ -52,6 +53,18 @@ post_install do |installer|
       # rechaza el archive con "Upload Symbols Failed".
       if config.name == 'Release'
         config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+      end
+    end
+
+    # Suprimir warning de dSYM faltante para objective_c.framework.
+    # Este framework interno de Flutter/CocoaPods no genera dSYM propio,
+    # lo que provoca el warning "The archive did not include a dSYM for
+    # objective_c.framework" en cada Archive. Al forzar 'dwarf' (sin dsym)
+    # solo en ese target, se elimina el warning sin afectar la subida de
+    # simbolos del resto de la app.
+    if target.name == 'objective_c'
+      target.build_configurations.each do |config|
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
       end
     end
   end

@@ -120,6 +120,16 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
   ```
 - No incluir `UIDeviceFamily` en `ios/Runner/Info.plist` — Xcode lo gestiona via el build setting `TARGETED_DEVICE_FAMILY`
 - El warning "Upload Symbols Failed" para `objective_c.framework` es **no bloqueante** — el archive pasa igual, ignorarlo
+- Para suprimir el warning "The archive did not include a dSYM for objective_c.framework", agregar este bloque **dentro** del loop `installer.pods_project.targets.each` en `post_install`:
+  ```ruby
+  # Suprimir warning de dSYM faltante para objective_c.framework.
+  # Este framework interno de Flutter/CocoaPods no genera dSYM propio.
+  if target.name == 'objective_c'
+    target.build_configurations.each do |config|
+      config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf'
+    end
+  end
+  ```
 
 ---
 
@@ -134,6 +144,7 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 | 2026-03-17 | Configurar firma release y applicationId para Google Play Store |
 | 2026-03-18 | Buenas prácticas de arjipagos: `endpoints.dart`, `AppLogger`, `AppStrings`, `AppDurations`, `ApiConfig` mejorado |
 | 2026-03-21 | Fix iOS build: ícono sin alpha, Podfile platform 13.0, inhibit_all_warnings!, dSYM release, UIDeviceFamily removido, colorScheme.surface |
+| 2026-03-21 | App Store: Bundle ID mx.gob.centro.sismmun, Team 3RMXY8CRUJ, share_plus 10.1.4 (privacy manifest), supresión warning dSYM objective_c.framework |
 
 ---
 
