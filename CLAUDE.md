@@ -96,6 +96,29 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 - Usar siempre `AppLogger` en lugar de `print` o `kDebugMode print`
 - Nunca usar colores hardcodeados (`Colors.red`, `Colors.green`, `Colors.grey`, etc.). Usar siempre `Theme.of(context).colorScheme` para todos los colores de la UI
 - Cuando el usuario tenga que interacturar con algun método o evento, que pregunte si desea hacer x cosas, con la opcion No o Cancelar como predeterminada.
+- Nunca usar `colorScheme.background` (deprecado desde Flutter 3.18) — usar `colorScheme.surface`
+
+## Reglas iOS (Podfile y proyecto)
+
+- El `Podfile` siempre debe tener `platform :ios, '13.0'` descomentado
+- El `Podfile` siempre debe tener `inhibit_all_warnings!` dentro del bloque `target 'Runner' do` para silenciar warnings de pods de terceros
+- El `post_install` del `Podfile` debe incluir siempre estos dos bloques:
+  ```ruby
+  # Forzar deployment target mínimo 13.0
+  if config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_f < 13.0
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+  end
+  # Generar dSYM en Release (requerido por App Store Connect)
+  if config.name == 'Release'
+    config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
+  end
+  ```
+- El ícono `Icon-App-1024x1024@1x.png` **nunca debe tener canal alpha**. Verificar con `sips -g hasAlpha`. Si tiene alpha, eliminarlo con:
+  ```bash
+  sips -s format jpeg <icono>.png --out /tmp/icon.jpg && sips -s format png /tmp/icon.jpg --out <icono>.png
+  ```
+- No incluir `UIDeviceFamily` en `ios/Runner/Info.plist` — Xcode lo gestiona via el build setting `TARGETED_DEVICE_FAMILY`
+- El warning "Upload Symbols Failed" para `objective_c.framework` es **no bloqueante** — el archive pasa igual, ignorarlo
 
 ---
 
@@ -109,6 +132,7 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 | 2026-03-17 | Corrección de bugs críticos iOS/Android + 60 tests |
 | 2026-03-17 | Configurar firma release y applicationId para Google Play Store |
 | 2026-03-18 | Buenas prácticas de arjipagos: `endpoints.dart`, `AppLogger`, `AppStrings`, `AppDurations`, `ApiConfig` mejorado |
+| 2026-03-21 | Fix iOS build: ícono sin alpha, Podfile platform 13.0, inhibit_all_warnings!, dSYM release, UIDeviceFamily removido, colorScheme.surface |
 
 ---
 
