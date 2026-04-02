@@ -56,17 +56,17 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Se requiere acceso a la cámara para tomar fotos.</string>
+	<string>Se requiere acceso a la cámara para tomar fotos de los problemas que se vayan reparando como baches, luminarias, fugas de agua, recolección de basura, etc. que tenga asignado este operador.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Se requiere acceso a la ubicación para registrar dónde se tomó la foto.</string>
+	<string>Se requiere acceso a la ubicación para registrar dónde se tomó la foto que se esta enviando para tener evidencias reales.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Se requiere acceso a la ubicación para registrar dónde se tomó la foto.</string>
+	<string>Se requiere acceso a la ubicación para registrar dónde se tomó la foto que se esta enviando para tener evidencias reales.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Se requiere acceso a la ubicación para registrar dónde se tomó la foto.</string>
+	<string>Se requiere acceso a la ubicación para registrar dónde se tomó la foto que se esta enviando para tener evidencias reales.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Se requiere acceso a la biblioteca de fotos para seleccionar imágenes.</string>
+	<string>Se requiere acceso a la biblioteca de fotos para seleccionar imágenes de otras fotos que avalen la reparación o solución de dicho servicio.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Se requiere acceso a la biblioteca de fotos para seleccionar imágenes.</string>
+	<string>Se requiere acceso a la biblioteca de fotos para seleccionar imágenes de otras fotos que avalen la reparación o solución de dicho servicio.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
