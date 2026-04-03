@@ -138,7 +138,7 @@ void main() {
 
       await tester.pumpWidget(_buildHomePage(mockHomeBloc, mockLoginBloc));
 
-      expect(find.text('No hay Solicituds registrados'), findsOneWidget);
+      expect(find.text('No hay Solicitudes registradas'), findsOneWidget);
     });
 
     testWidgets('muestra ícono cuando no hay solicitudes', (tester) async {

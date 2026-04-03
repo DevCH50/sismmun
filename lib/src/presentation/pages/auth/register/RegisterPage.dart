@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_hardcoded_colors — Los colores blancos son intencionales:
+// RegisterPage se muestra sobre un fondo oscuro con imagen. El blanco garantiza
+// legibilidad en ese contexto específico.
 import 'package:sismmun/src/presentation/widgets/DefaultIconBack.dart';
 import 'package:sismmun/src/presentation/widgets/DefaultTextField.dart';
 import 'package:sismmun/src/presentation/widgets/PrimaryElevatedButton.dart';

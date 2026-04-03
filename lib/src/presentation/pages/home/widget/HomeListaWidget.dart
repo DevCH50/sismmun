@@ -40,25 +40,31 @@ class HomeListaWidget extends StatelessWidget {
 
           // Indicador de resultados cuando hay búsqueda activa
           if (state.isSearching)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  const Icon(Icons.filter_list, size: 16, color: Colors.white70),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${solicitudesAMostrar.length} resultado${solicitudesAMostrar.length != 1 ? 's' : ''}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
+            Builder(builder: (ctx) {
+              final cs = Theme.of(ctx).colorScheme;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(Icons.filter_list, size: 16,
+                        color: cs.onPrimary.withValues(alpha: 0.7)),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${solicitudesAMostrar.length} resultado${solicitudesAMostrar.length != 1 ? 's' : ''}',
+                      style: TextStyle(
+                          color: cs.onPrimary.withValues(alpha: 0.7),
+                          fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            }),
 
           // Lista o aviso de sin resultados
           if (state.solicitudesResponse != null)
             Expanded(
               child: solicitudesAMostrar.isEmpty
-                  ? _buildSinResultados()
+                  ? _buildSinResultados(context)
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: solicitudesAMostrar.length,
@@ -80,25 +86,28 @@ class HomeListaWidget extends StatelessWidget {
   }
 
   /// Mensaje cuando la búsqueda activa no arroja resultados.
-  Widget _buildSinResultados() {
-    return const Center(
+  Widget _buildSinResultados(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, size: 64, color: Colors.white70),
-          SizedBox(height: 16),
+          Icon(Icons.search_off, size: 64,
+              color: cs.onPrimary.withValues(alpha: 0.7)),
+          const SizedBox(height: 16),
           Text(
             'No se encontraron solicitudes',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white,
+              color: cs.onPrimary,
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Intenta con otro término de búsqueda',
-            style: TextStyle(fontSize: 14, color: Colors.white70),
+            style: TextStyle(
+                fontSize: 14, color: cs.onPrimary.withValues(alpha: 0.7)),
           ),
         ],
       ),

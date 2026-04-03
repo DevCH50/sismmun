@@ -15,19 +15,20 @@ class HomeSinSolicitudesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.people_outline,
             size: 64,
-            color: Colors.grey,
+            color: cs.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No hay Solicituds registrados',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+          Text(
+            'No hay Solicitudes registradas',
+            style: TextStyle(fontSize: 16, color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(

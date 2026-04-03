@@ -145,6 +145,7 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 | 2026-03-18 | Buenas prácticas de arjipagos: `endpoints.dart`, `AppLogger`, `AppStrings`, `AppDurations`, `ApiConfig` mejorado |
 | 2026-03-21 | Fix iOS build: ícono sin alpha, Podfile platform 13.0, inhibit_all_warnings!, dSYM release, UIDeviceFamily removido, colorScheme.surface |
 | 2026-03-21 | App Store: Bundle ID mx.gob.centro.sismmun, Team 3RMXY8CRUJ, share_plus 10.1.4 (privacy manifest), supresión warning dSYM objective_c.framework |
+| 2026-04-03 | HomeDrawer con CopyableListTile (avatar, campos copiables, versiones); corrección colores hardcodeados; release v1.1.1+5 Android (APK + AAB) |
 
 ---
 

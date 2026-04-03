@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+// ignore_for_file: avoid_hardcoded_colors — El blanco es intencional:
+// DefaultIconBack se usa exclusivamente sobre fondos oscuros (pantalla de login
+// y registro con imagen de fondo). El blanco garantiza legibilidad en ese contexto.
 
 class DefaultIconBack extends StatelessWidget {
   final double left;

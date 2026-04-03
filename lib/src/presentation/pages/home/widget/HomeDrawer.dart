@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:sismmun/src/core/constants/app_strings.dart';
 import 'package:sismmun/src/data/api/ApiConfig.dart';
 import 'package:sismmun/src/data/dataSource/local/SharedPref.dart';
 import 'package:sismmun/src/domain/models/AuthResponse.dart';
 import 'package:sismmun/src/domain/models/User.dart';
 import 'package:sismmun/src/presentation/pages/home/widget/UserAvatar.dart';
+import 'package:sismmun/src/presentation/widgets/CopyableListTile.dart';
 
 /// Drawer lateral principal de la pantalla Home.
 ///
@@ -34,18 +34,6 @@ class HomeDrawer extends StatelessWidget {
     return '$base/storage/profile/${filenameThumb.toString()}';
   }
 
-  /// Copia [texto] al portapapeles y muestra confirmación breve.
-  void _copiar(BuildContext context, String texto) {
-    Clipboard.setData(ClipboardData(text: texto));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppStrings.drawerCopiado(texto)),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -63,7 +51,7 @@ class HomeDrawer extends StatelessWidget {
               _buildHeader(context, user, cs),
 
               // ── Campos copiables ────────────────────────────────────────
-              if (user != null) ..._buildCamposCopiables(context, user, cs),
+              if (user != null) ..._buildCamposCopiables(user),
 
               const Divider(),
 
@@ -146,8 +134,7 @@ class HomeDrawer extends StatelessWidget {
   }
 
   /// Genera los ListTile copiables para username, email y celulares.
-  List<Widget> _buildCamposCopiables(
-      BuildContext context, User user, ColorScheme cs) {
+  List<Widget> _buildCamposCopiables(User user) {
     final campos = <_CampoCopiable>[
       if (user.username.isNotEmpty)
         _CampoCopiable(
@@ -171,29 +158,10 @@ class HomeDrawer extends StatelessWidget {
 
     return campos
         .map(
-          (c) => ListTile(
-            dense: true,
-            leading: Icon(c.icono, color: cs.primary, size: 22),
-            title: Text(
-              c.etiqueta,
-              style: TextStyle(
-                fontSize: 11,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-            subtitle: Text(
-              c.valor,
-              style: TextStyle(
-                fontSize: 14,
-                color: cs.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.copy, size: 18, color: cs.onSurfaceVariant),
-              tooltip: 'Copiar',
-              onPressed: () => _copiar(context, c.valor),
-            ),
+          (c) => CopyableListTile(
+            icon: c.icono,
+            label: c.etiqueta,
+            value: c.valor,
           ),
         )
         .toList();

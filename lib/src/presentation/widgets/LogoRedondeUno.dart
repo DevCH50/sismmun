@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+// ignore_for_file: avoid_hardcoded_colors — Los colores blancos/negros son intencionales:
+// LogoRedondoUno se muestra sobre fondos oscuros (pantalla de login). El blanco
+// semitransparente y la sombra negra son efectos de overlay, no colores de UI adaptables.
 
 class LogoRedondoUno extends StatelessWidget {
   final double blurRadius;

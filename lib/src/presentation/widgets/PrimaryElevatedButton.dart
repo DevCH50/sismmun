@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+// ignore_for_file: avoid_hardcoded_colors — Colors.white / Colors.black87 son calculados
+// dinámicamente con ThemeData.estimateBrightnessForColor() para garantizar legibilidad
+// sobre cualquier color de fondo del botón. No son colores de UI hardcodeados fijos.
 
 /// Botón elevado principal reutilizable con estilo personalizado.
 ///

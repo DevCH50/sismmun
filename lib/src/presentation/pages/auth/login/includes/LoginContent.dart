@@ -1,3 +1,6 @@
+// ignore_for_file: avoid_hardcoded_colors — Los colores blancos son intencionales:
+// LoginContent se muestra sobre un fondo oscuro con imagen de fondo. El blanco
+// y el blanco semitransparente garantizan legibilidad en ese contexto específico.
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginBloc.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginEvent.dart';
 import 'package:sismmun/src/presentation/pages/auth/login/bloc/LoginState.dart';

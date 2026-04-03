@@ -87,7 +87,7 @@ class CloseSession extends StatelessWidget {
           child: Text(
             confirmText,
             style: TextStyle(
-              color: confirmTextColor ?? Colors.white,
+              color: confirmTextColor ?? Theme.of(context).colorScheme.onPrimary,
             ),
           ),
         ),

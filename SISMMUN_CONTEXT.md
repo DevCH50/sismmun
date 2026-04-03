@@ -211,3 +211,14 @@ Todos los `Colors.X` reemplazados con `Theme.of(context).colorScheme` en:
 ### Inicialización correcta del contador de imágenes (2026-03-18) ✅ APROBADO
 - `SolicitudItem.initState()` ahora cuenta las imágenes existentes con `tipo_foto == 'después'/'despues'`
 - El botón "Marcar como Atendida" se habilita correctamente al cargar solicitudes que ya tienen imágenes
+
+### HomeDrawer con perfil y CopyableListTile (2026-04-03) ✅ APROBADO
+- **Ubicación:** `lib/src/presentation/pages/home/widget/HomeDrawer.dart`
+- **Nuevo widget:** `lib/src/presentation/widgets/CopyableListTile.dart`
+- **Características:**
+  - Encabezado con gradiente (`cs.primary` → `cs.primaryContainer`) y logo
+  - `UserAvatar` con foto de perfil o inicial del nombre
+  - Campos copiables (username, email, celular) con animación de check
+  - Sección de versiones (App / API)
+  - Botón de cerrar sesión con `cs.error`
+  - Compatible con temas claro/oscuro
