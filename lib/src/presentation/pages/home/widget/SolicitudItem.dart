@@ -344,7 +344,10 @@ class _SolicitudItemState extends State<SolicitudItem> {
       soloImagen: !marcarAtendida,
       onImageUploaded: (imagen) {
         setState(() {
+          // Sobreescribir metadatos desde la sesión local porque el backend
+          // puede no ecoar estos campos en la respuesta del upload.
           imagen.tipoFoto = metadatos.tipoFoto.valor;
+          imagen.observaciones = metadatos.observaciones;
           _imagenesLocales.add(imagen);
           if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
         });
@@ -403,6 +406,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
         onImageUploaded: (img) {
           setState(() {
             img.tipoFoto = metadatos.tipoFoto.valor;
+            img.observaciones = metadatos.observaciones;
             _imagenesLocales.add(img);
             if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
           });
@@ -456,6 +460,7 @@ class _SolicitudItemState extends State<SolicitudItem> {
         if (mounted) {
           setState(() {
             img.tipoFoto = metadatos.tipoFoto.valor;
+            img.observaciones = metadatos.observaciones;
             _imagenesLocales.add(img);
             if (metadatos.tipoFoto == TipoFoto.despues) _imagenesDespes++;
           });

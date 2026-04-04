@@ -11,8 +11,11 @@ void main() {
         'fecha': '2026-03-17 10:30:00',
         'url_imagen': 'https://siac.villahermosa.gob.mx/img/foto.jpg',
         'url_thumb': 'https://siac.villahermosa.gob.mx/img/thumb.jpg',
+        'observaciones': 'Bache en esquina',
+        'tipo_foto': 'antes',
         'status': 1,
         'msg': 'Imagen subida correctamente',
+        'es_eliminable': true,
       };
 
       final imagen = Imagen.fromJson(json);
@@ -21,8 +24,37 @@ void main() {
       expect(imagen.fecha, '2026-03-17 10:30:00');
       expect(imagen.urlImagen, 'https://siac.villahermosa.gob.mx/img/foto.jpg');
       expect(imagen.urlThumb, 'https://siac.villahermosa.gob.mx/img/thumb.jpg');
+      expect(imagen.observaciones, 'Bache en esquina');
+      expect(imagen.tipoFoto, 'antes');
       expect(imagen.status, 1);
       expect(imagen.msg, 'Imagen subida correctamente');
+      expect(imagen.isEliminable, true);
+    });
+
+    test('parsea observaciones desde clave "observacion" (singular) como fallback', () {
+      // El backend puede devolver 'observacion' (singular) en el listado de solicitudes
+      final json = {
+        'imagen_id': 10,
+        'fecha': '2026-04-03',
+        'url_imagen': 'http://test.com/img.jpg',
+        'url_thumb': 'http://test.com/thumb.jpg',
+        'observacion': 'Daño en banqueta',
+        'tipo_foto': 'despues',
+      };
+
+      final imagen = Imagen.fromJson(json);
+
+      expect(imagen.observaciones, 'Daño en banqueta');
+      expect(imagen.tipoFoto, 'despues');
+    });
+
+    test('observaciones vacío cuando no hay ninguna clave de observación', () {
+      final imagen = Imagen.fromJson({
+        'fecha': '',
+        'url_imagen': '',
+        'url_thumb': '',
+      });
+      expect(imagen.observaciones, '');
     });
 
     test('parsea imagen_id desde clave "id" como fallback', () {

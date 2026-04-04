@@ -28,7 +28,9 @@ class Imagen {
         fecha: json['fecha'] ?? '',
         urlImagen: json['url_imagen'] ?? '',
         urlThumb: json['url_thumb'] ?? '',
-        observaciones: json['observaciones'] ?? '',
+        // El backend puede devolver 'observaciones' (plural, upload) o
+        // 'observacion' (singular, listado de solicitudes).
+        observaciones: json['observaciones'] ?? json['observacion'] ?? '',
         tipoFoto: json['tipo_foto'] ?? '',
         status: json['status'] ?? 0,
         msg: json['msg'] ?? '',

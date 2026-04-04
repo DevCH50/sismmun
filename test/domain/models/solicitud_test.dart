@@ -100,7 +100,17 @@ void main() {
         'longitud': '0',
         'observaciones': '',
         'imagenes': [
-          {'fecha': '2026-01-10', 'url_imagen': 'http://test.com/img.jpg', 'url_thumb': 'http://test.com/thumb.jpg', 'status': 1, 'msg': 'OK'},
+          {
+            'imagen_id': 5,
+            'fecha': '2026-01-10',
+            'url_imagen': 'http://test.com/img.jpg',
+            'url_thumb': 'http://test.com/thumb.jpg',
+            'observaciones': 'Vista frontal del bache',
+            'tipo_foto': 'antes',
+            'status': 1,
+            'msg': 'OK',
+            'es_eliminable': true,
+          },
         ],
         'respuestas': [
           {
@@ -122,6 +132,11 @@ void main() {
 
       expect(solicitud.imagenes, hasLength(1));
       expect(solicitud.imagenes?.first, isA<Imagen>());
+      // Verifica que observaciones e isEliminable se preservan al parsear
+      // las imágenes dentro de una solicitud.
+      expect(solicitud.imagenes?.first?.observaciones, 'Vista frontal del bache');
+      expect(solicitud.imagenes?.first?.tipoFoto, 'antes');
+      expect(solicitud.imagenes?.first?.isEliminable, true);
       expect(solicitud.respuestas, hasLength(1));
       expect(solicitud.respuestas?.first, isA<Respuesta>());
     });
