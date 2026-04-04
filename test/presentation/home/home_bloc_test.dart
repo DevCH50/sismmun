@@ -182,7 +182,7 @@ void main() {
   });
 
   // Estado pre-cargado con solicitudes para tests de búsqueda
-  HomeState _estadoConSolicitudes({int count = 3}) {
+  HomeState estadoConSolicitudes({int count = 3}) {
     final solicitudes = List.generate(count, (i) => _buildSolicitud(id: i + 1));
     return HomeState(
       solicitudes: solicitudes,
@@ -195,7 +195,7 @@ void main() {
     blocTest<HomeBloc, HomeState>(
       'filtra solicitudes por texto en la denuncia',
       build: buildBloc,
-      seed: () => _estadoConSolicitudes(count: 3),
+      seed: () => estadoConSolicitudes(count: 3),
       act: (bloc) => bloc.add(const SearchSolicitudesEvent('Bache en calle 1')),
       expect: () => [
         isA<HomeState>()
@@ -228,7 +228,7 @@ void main() {
     blocTest<HomeBloc, HomeState>(
       'filtra solicitudes por ID numérico exacto',
       build: buildBloc,
-      seed: () => _estadoConSolicitudes(count: 5),
+      seed: () => estadoConSolicitudes(count: 5),
       act: (bloc) => bloc.add(const SearchSolicitudesEvent('3')),
       verify: (bloc) {
         expect(bloc.state.isSearching, true);
