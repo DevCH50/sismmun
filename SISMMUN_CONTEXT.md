@@ -222,3 +222,14 @@ Todos los `Colors.X` reemplazados con `Theme.of(context).colorScheme` en:
   - Sección de versiones (App / API)
   - Botón de cerrar sesión con `cs.error`
   - Compatible con temas claro/oscuro
+
+### Actualización Flutter 3.38.9 → 3.41.6 (2026-05-15) ✅ APROBADO
+- Flutter SDK actualizado de 3.38.9 a 3.41.6
+- `dart fix` aplicado en tests para compatibilidad con el nuevo SDK
+- `pubspec.lock` y `Podfile.lock` regenerados tras `flutter clean && pod install`
+- 188 tests pasan sin errores
+
+### Nuevas reglas CLAUDE.md + Release v1.1.3+7 (2026-06-05) ✅ APROBADO
+- Reglas de código actualizadas: eficiencia en tokens, `AlertDialog` obligatorio (no Toast/SnackBar), `AppStrings` para todos los textos, `AppDurations`, sin colores hardcodeados
+- 188 tests pasan; `flutter analyze` sin errores (79 `info` de nomenclatura de archivos pre-existentes)
+- Release Android: APK + AAB v1.1.3+7

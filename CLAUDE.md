@@ -70,6 +70,7 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 
 ## Reglas del código
 
+<!-- - Antes de implementar, asegúrate de planificar en modo plan y luego escribe.
 - Todo en español (comentarios, commits, documentación)
 - Widgets < 200 líneas
 - No utilizar más de 3 niveles de anidación de widgets
@@ -97,7 +98,44 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 - Usar siempre `AppLogger` en lugar de `print` o `kDebugMode print`
 - Nunca usar colores hardcodeados (`Colors.red`, `Colors.green`, `Colors.grey`, etc.). Usar siempre `Theme.of(context).colorScheme` para todos los colores de la UI
 - Cuando el usuario tenga que interacturar con algun método o evento, que pregunte si desea hacer x cosas, con la opcion No o Cancelar como predeterminada.
-- Nunca usar `colorScheme.background` (deprecado desde Flutter 3.18) — usar `colorScheme.surface`
+- Nunca usar `colorScheme.background` (deprecado desde Flutter 3.18) — usar `colorScheme.surface` -->
+
+
+## Reglas del código
+
+- Busca la mejor manera de hacer tu trabajo sin consumir tantos tokens, usa agentes y subagentes de ser necesario
+- Antes de implementar, asegúrate de planificar en modo plan y luego escribe.
+- Todo en español (comentarios, commits, documentación)
+- Widgets < 200 líneas (si tiene más, táchalo en archivos más pequeños).
+- No utilizar más de 3 niveles de anidación de widgets (si tiene más, táchalo en archivos más pequeños).
+- Los widgets deben ser finamente responsivos para Android e iOS
+- Tests obligatorios para features nuevas
+- Material Design 3
+- Revisa que tengas todos los permisos necesarios tanto para iOS como para Android tanto de manera implícita como explícita
+- Archivos bien comentados
+- Guardar todo el progreso en SISMMUN_CONTEXT.md — solo trabajo realizado dentro del proyecto SisMMun; nunca registrar cambios de otros proyectos 
+- Guarda todo lo que ya esta aprobado y funcionando bien
+- No borrar nada sin preguntar
+- Asegúrate de que todos los widgets y pantallas estén bien optimizados para Android e iOS y en ambos temas, oscuros y claros
+- Debes asegurarte de no romper nada y que se apegue estrictamente a las arquitecturas limpias y la inyección de dependencias
+- Si tienes dudas, pregunta, antes de proceder
+- Si tienes que crear un nuevo archivo, asegúrate de que esté bien comentado y que esté bien estructurado
+- No Toast, no SnackBar — utiliza `AlertDialog` (con `showDialog`) para mostrar mensajes de éxito o error al usuario. Usar `dialogContext` del builder para `Navigator.pop` del dialog, y `context` externo solo para navegar fuera de la pantalla.
+- Quita del git, todo aquello que no debe ir o que es peligroso que este en git. Me refiero al  
+  remoto. Incluye la carpeta "otros".
+- Revisa que no haya desperdicio de memoria o de espacio en disco. Sino que tengas un uso eficiente de los recursos. Y que no quede ningun tipo de basura. Por ejemplo, si vas a usar una variable, asegúrate de que la uses y no la dejes ahí sin usar. Si vas a usar una función, asegúrate de que la uses y no la dejes ahí sin usar. Si vas a usar una clase, asegúrate de que la uses y no la dejes ahí sin usar. Si vas a usar un widget, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar un evento, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar un estado, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar un repositorio, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar un caso de uso, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar un modelo, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar una entidad, asegúrate de que la uses y no la dejes ahí sin usar. Si vas a usar una interfaz, asegúrate de que la uses y no la dejes ahí sin usar. Si vas a usar un servicio, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar una utilidad, asegúrate de que la uses y no la dejes ahí sin usar. Si vas a usar un archivo de configuración, asegúrate de que lo uses y no lo dejes ahí sin usar. Si vas a usar un archivo de prueba, asegúrate de que lo uses y no lo dejes ahí sin usar.
+- Todos los strings hardcodeados en el código que deberían estar en AppStrings
+- No te metas al backend a menos que el usuario te lo pida.
+- Revisa minuciosamente que en iOS y Android no tenga fallos o errores, que todo funcione  
+  perfectamente bien, y que se vea en todas los distintos tamaños de pantallas tando de iOS como  
+  de Android
+- Para GIT solo del proyecto actual SisMMun, y solo de los archivos que tengan cambios. No  
+  incluyas archivos de log, ni de editor, ni de version de sistema operativo, ni nada por el estilo.
+- No me refiero a los archivos que estan en el .gitignore, sino a los archivos que no son  
+  necesarios para el funcionamiento del proyecto. Por ejemplo: .claude, .idea, .vscode, etc.  
+  Estos archivos solo me deben servir a mi para trabajar en el proyecto.
+- Tambien cuando tengas que ejecutar algun comando en la consola, asegurate de que se  
+  ejecute correctamente y que no haya ningun error.
 
 ## Reglas iOS (Podfile y proyecto)
 
@@ -146,6 +184,8 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 | 2026-03-21 | Fix iOS build: ícono sin alpha, Podfile platform 13.0, inhibit_all_warnings!, dSYM release, UIDeviceFamily removido, colorScheme.surface |
 | 2026-03-21 | App Store: Bundle ID mx.gob.centro.sismmun, Team 3RMXY8CRUJ, share_plus 10.1.4 (privacy manifest), supresión warning dSYM objective_c.framework |
 | 2026-04-03 | HomeDrawer con CopyableListTile (avatar, campos copiables, versiones); corrección colores hardcodeados; release v1.1.1+5 Android (APK + AAB) |
+| 2026-05-15 | Actualización Flutter 3.38.9 → 3.41.6; dart fix en tests; bump pubspec.lock |
+| 2026-06-05 | Nuevas reglas CLAUDE.md (tokens eficientes, AlertDialog, strings en AppStrings, sin colores hardcoded); release v1.1.3+7 Android (APK + AAB) |
 
 ---
 
